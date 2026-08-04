@@ -2,8 +2,11 @@ import { House, Layers3 } from 'lucide-react';
 import { createBrowserRouter, Link, Outlet } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
+const navLinkClass =
+  'rounded-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
 const linkButtonClass =
-  'inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90';
+  'inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
 
 function Layout() {
   return (
@@ -14,10 +17,10 @@ function Layout() {
             React SPA
           </Link>
           <nav className="flex gap-4 text-sm text-muted-foreground">
-            <Link className="hover:text-foreground" to="/">
+            <Link className={navLinkClass} to="/">
               홈
             </Link>
-            <Link className="hover:text-foreground" to="/about">
+            <Link className={navLinkClass} to="/about">
               소개
             </Link>
           </nav>
@@ -39,7 +42,7 @@ function HomePage() {
           가볍게 시작하는 React SPA
         </h1>
         <p className="max-w-2xl text-lg leading-8 text-muted-foreground">
-          라우팅, Tailwind CSS, 기본 UI와 검증 명령만 포함한 범용 보일러플레이트입니다.
+          라우팅, Tailwind CSS, 기본 UI와 검증 명령을 포함한 범용 보일러플레이트입니다.
         </p>
       </div>
       <Link className={linkButtonClass} to="/about">
