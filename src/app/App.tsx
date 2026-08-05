@@ -52,8 +52,9 @@ function HomePage() {
       </Link>
       <div className="w-full max-w-lg overflow-hidden rounded-md border border-border bg-card">
         <div className="h-4 bg-teal-400" />
-        <div className="flex min-h-40 items-start px-10 py-8">
+        <div className="flex min-h-40 items-start gap-3 px-10 py-8">
           <Button variant="outline">버튼1</Button>
+          <Button variant="outline">버튼5</Button>
         </div>
       </div>
     </section>
