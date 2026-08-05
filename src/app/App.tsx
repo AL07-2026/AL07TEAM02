@@ -2,6 +2,8 @@ import { House, Layers3 } from 'lucide-react';
 import { createBrowserRouter, Link, Outlet } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
+import { Button } from '@/components/ui/button';
+
 const navLinkClass =
   'rounded-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
 
@@ -48,6 +50,12 @@ function HomePage() {
       <Link className={linkButtonClass} to="/about">
         구성 확인
       </Link>
+      <div className="w-full max-w-lg overflow-hidden rounded-md border border-border bg-card">
+        <div className="h-4 bg-teal-400" />
+        <div className="flex min-h-40 items-start px-10 py-8">
+          <Button variant="outline">버튼1</Button>
+        </div>
+      </div>
     </section>
   );
 }
