@@ -56,7 +56,6 @@ function HomePage() {
           <Button className="border-pink-200 bg-pink-100 text-pink-800 hover:bg-pink-200" variant="outline">
             버튼1
           </Button>
-          <Button variant="outline">버튼5</Button>
         </div>
       </div>
     </section>
