@@ -3,6 +3,8 @@ import { createBrowserRouter, Link, Outlet } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
 import { Button } from '@/components/ui/button';
+import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
+import { mockTargetCompany } from '@/features/apply/mock-target-company';
 
 const navLinkClass =
   'rounded-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
@@ -96,6 +98,12 @@ function NotFoundPage() {
 }
 
 const router = createBrowserRouter([
+  {
+    path: '/apply',
+    element: (
+      <ColdEmailRequestPage targetCompany={import.meta.env.DEV ? mockTargetCompany : undefined} />
+    ),
+  },
   {
     path: '/',
     Component: Layout,
