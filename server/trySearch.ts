@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { analyzeCompanies } from '../src/jobs/analysis.ts';
@@ -12,11 +12,13 @@ import { fetchAlioJobs } from './alioClient.ts';
 import { fetchAlioJobDetail } from './alioDetail.ts';
 import { JobStore } from './jobStore.ts';
 import { runJobPipeline } from './jobPipeline.ts';
+import { fetchJoobleJobs } from './joobleClient.ts';
 
 const databasePath = resolve('data/job-signals.db');
 const refreshInterval = 6 * 60 * 60 * 1000;
 const roles: AnalysisRole[] = ['sales', 'recruiter', 'investor'];
 const regionTerms = { seoul: '서울', gyeonggi: '경기', busan: '부산' } as const;
+const joobleRefreshes = new Map<string, number>();
 
 function validateRequest(value: unknown): TrySearchRequest {
   if (typeof value !== 'object' || value === null) throw new Error('검색 조건이 필요합니다.');
@@ -46,11 +48,11 @@ function hasDirectMatch(result: ReturnType<typeof analyzeCompanies>[number]) {
   return result.evidenceUrls.length > 0;
 }
 
-function readAlioPostings() {
+function readPostings() {
   if (!existsSync(databasePath)) return [];
   const store = new JobStore(databasePath);
   try {
-    return store.readPostings('alio');
+    return store.readPostings().filter((posting) => posting.source !== 'normalized');
   } finally {
     store.close();
   }
@@ -61,9 +63,9 @@ function isFresh(postings: NormalizedJobPosting[], now: Date) {
   return postings.length > 0 && now.getTime() - latestCollection < refreshInterval;
 }
 
-async function refreshIfNeeded(postings: NormalizedJobPosting[], now: Date) {
+async function refreshAlioIfNeeded(postings: NormalizedJobPosting[], now: Date) {
   const serviceKey = process.env.ALIO_API_KEY;
-  if (!serviceKey || isFresh(postings, now)) return postings;
+  if (!serviceKey || isFresh(postings, now)) return;
 
   const payload = await fetchAlioJobs(serviceKey, now);
   runJobPipeline({
@@ -72,7 +74,30 @@ async function refreshIfNeeded(postings: NormalizedJobPosting[], now: Date) {
     collectedAt: now.toISOString(),
     databasePath,
   });
-  return readAlioPostings();
+}
+
+async function refreshJoobleIfNeeded(request: TrySearchRequest, now: Date) {
+  const apiKey = process.env.JOOBLE_API_KEY;
+  if (!apiKey) return;
+
+  const searchKey = `${request.query}|${request.region ?? 'all'}`;
+  const lastRefresh = joobleRefreshes.get(searchKey) ?? 0;
+  if (now.getTime() - lastRefresh < refreshInterval) return;
+
+  const payload = await fetchJoobleJobs(apiKey, {
+    keywords: request.query,
+    location: request.region && request.region !== 'all' ? regionTerms[request.region] : '',
+  });
+  const collectedAt = now.toISOString();
+  const rawDirectory = resolve('data/raw/jooble');
+  mkdirSync(rawDirectory, { recursive: true });
+  writeFileSync(
+    resolve(rawDirectory, `${collectedAt.replace(/[:.]/g, '-')}.json`),
+    `${JSON.stringify(payload, null, 2)}\n`,
+    'utf8',
+  );
+  runJobPipeline({ source: 'jooble', payload, collectedAt, databasePath });
+  joobleRefreshes.set(searchKey, now.getTime());
 }
 
 async function enrichMatchedPostings(
@@ -111,7 +136,9 @@ async function enrichMatchedPostings(
   } finally {
     store.close();
   }
-  return postings.map((posting) => enrichedById.get(posting.externalId) ?? posting);
+  return postings.map((posting) =>
+    posting.source === 'alio' ? (enrichedById.get(posting.externalId) ?? posting) : posting,
+  );
 }
 
 export async function searchTryCompanies(
@@ -119,11 +146,20 @@ export async function searchTryCompanies(
   now = new Date(),
 ): Promise<TrySearchResponse> {
   const request = validateRequest(rawRequest);
-  let postings = readAlioPostings();
-  postings = await refreshIfNeeded(postings, now);
+  let postings = readPostings();
+  const alioPostings = postings.filter((posting) => posting.source === 'alio');
+  await refreshAlioIfNeeded(alioPostings, now);
+  let joobleError: unknown;
+  try {
+    await refreshJoobleIfNeeded(request, now);
+  } catch (error) {
+    joobleError = error;
+  }
+  postings = readPostings();
 
   if (!postings.length) {
-    throw new Error('수집된 채용공고가 없습니다. 먼저 ALIO 데이터를 수집해주세요.');
+    if (joobleError instanceof Error) throw joobleError;
+    throw new Error('수집된 채용공고가 없습니다. API 키와 수집 상태를 확인해주세요.');
   }
 
   let filteredPostings = filterByRegion(postings, request.region);

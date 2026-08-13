@@ -1,5 +1,6 @@
 import {
   adaptAlioResponse,
+  adaptJoobleResponse,
   adaptNormalizedRecords,
   adaptSaraminResponse,
 } from '../src/jobs/adapters.ts';
@@ -46,6 +47,7 @@ export function adaptJobPayload(
 ): NormalizedJobPosting[] {
   if (source === 'saramin') return adaptSaraminResponse(payload, collectedAt);
   if (source === 'alio') return adaptAlioResponse(payload, collectedAt);
+  if (source === 'jooble') return adaptJoobleResponse(payload, collectedAt);
   return adaptNormalizedRecords(getArray(payload) as NormalizedJobInput[]);
 }
 

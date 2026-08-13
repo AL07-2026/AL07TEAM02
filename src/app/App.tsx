@@ -17,6 +17,8 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { createBrowserRouter } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
 
 import { TryPage } from '@/pages/TryPage';
 
@@ -589,6 +591,12 @@ function LandingPage() {
   );
 }
 
+const router = createBrowserRouter([
+  { path: '/try', Component: TryPage },
+  { path: '/experience', Component: TryPage },
+  { path: '*', Component: LandingPage },
+]);
+
 export function App() {
-  return ['/try', '/experience'].includes(window.location.pathname) ? <TryPage /> : <LandingPage />;
+  return <RouterProvider router={router} />;
 }

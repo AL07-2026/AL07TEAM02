@@ -46,8 +46,8 @@ function main() {
   const collectedAt = new Date(argumentsMap.get('collected-at') ?? Date.now()).toISOString();
   const outputFile = resolve(argumentsMap.get('output') ?? 'data/latest-analysis.json');
 
-  if (!['alio', 'saramin', 'normalized'].includes(source)) {
-    throw new Error('--source는 alio, saramin, normalized 중 하나여야 합니다.');
+  if (!['alio', 'jooble', 'saramin', 'normalized'].includes(source)) {
+    throw new Error('--source는 alio, jooble, saramin, normalized 중 하나여야 합니다.');
   }
   if (!['sales', 'recruiter', 'investor'].includes(role)) {
     throw new Error('--role은 sales, recruiter, investor 중 하나여야 합니다.');

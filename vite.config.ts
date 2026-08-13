@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import type { Connect, Plugin } from 'vite';
+import { loadEnv, type Connect, type Plugin } from 'vite';
 import { defineConfig } from 'vitest/config';
 
 import { searchTryCompanies } from './server/trySearch.ts';
@@ -58,22 +58,30 @@ function readJsonBody(request: Connect.IncomingMessage) {
   });
 }
 
-export default defineConfig({
-  plugins: [react(), tailwindcss(), trySearchApi()],
-  resolve: {
-    alias: {
-      '@': path.resolve(rootDirectory, 'src'),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, rootDirectory, '');
+  if (!process.env.ALIO_API_KEY && env.ALIO_API_KEY) process.env.ALIO_API_KEY = env.ALIO_API_KEY;
+  if (!process.env.JOOBLE_API_KEY && env.JOOBLE_API_KEY) {
+    process.env.JOOBLE_API_KEY = env.JOOBLE_API_KEY;
+  }
+
+  return {
+    plugins: [react(), tailwindcss(), trySearchApi()],
+    resolve: {
+      alias: {
+        '@': path.resolve(rootDirectory, 'src'),
+      },
     },
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./src/test/setup.ts'],
-    css: true,
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html'],
-      exclude: ['src/main.tsx', 'src/test/**'],
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['./src/test/setup.ts'],
+      css: true,
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'html'],
+        exclude: ['src/main.tsx', 'src/test/**'],
+      },
     },
-  },
+  };
 });

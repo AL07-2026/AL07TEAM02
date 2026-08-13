@@ -1,4 +1,38 @@
-import { adaptAlioResponse, adaptSaraminResponse } from './adapters.ts';
+import { adaptAlioResponse, adaptJoobleResponse, adaptSaraminResponse } from './adapters.ts';
+
+describe('adaptJoobleResponse', () => {
+  it('Jooble 검색 응답을 공통 채용공고 형식으로 변환한다', () => {
+    const [posting] = adaptJoobleResponse(
+      {
+        totalCount: 1,
+        jobs: [
+          {
+            id: 6853340702360284000,
+            title: 'Backend Developer',
+            company: '테스트랩',
+            location: '서울',
+            snippet: '<b>TypeScript</b>와 AWS 기반 서버 개발',
+            type: '정규직',
+            link: 'https://kr.jooble.org/desc/6853340702360284249',
+            updated: '2026-08-12T23:27:48+09:00',
+          },
+        ],
+      },
+      '2026-08-13T00:00:00+09:00',
+    );
+
+    expect(posting).toMatchObject({
+      source: 'jooble',
+      externalId: '6853340702360284249',
+      companyName: '테스트랩',
+      jobFamily: 'engineering',
+      description: 'TypeScript와 AWS 기반 서버 개발',
+      location: '서울',
+      active: true,
+    });
+    expect(posting?.skills).toEqual(expect.arrayContaining(['TypeScript', 'AWS']));
+  });
+});
 
 describe('adaptSaraminResponse', () => {
   it('사람인 검색 응답을 공통 채용공고 형식으로 변환한다', () => {

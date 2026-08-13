@@ -63,6 +63,61 @@ function getSaraminJobs(response: unknown) {
   return isRecord(rawJobs) ? [rawJobs] : [];
 }
 
+function stripMarkup(value: string) {
+  return value
+    .replace(/<br\s*\/?\s*>/gi, ' ')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function adaptJoobleResponse(
+  response: unknown,
+  collectedAt: string,
+): NormalizedJobPosting[] {
+  if (!isRecord(response) || !Array.isArray(response.jobs)) {
+    throw new Error('Jooble 채용공고 목록이 없습니다.');
+  }
+
+  return response.jobs.filter(isRecord).flatMap((job) => {
+    const sourceUrl = getString(job.link);
+    const companyName = getString(job.company).trim();
+    const title = getString(job.title).trim();
+    const publishedAt = getString(job.updated).trim();
+    const linkedId = sourceUrl.match(/\/desc\/(\d+)/)?.[1] ?? '';
+    const externalId = linkedId || getString(job.id) || sourceUrl;
+
+    if (!sourceUrl || !companyName || !title || !publishedAt || !externalId) return [];
+
+    return [
+      normalizeJobPosting({
+        source: 'jooble',
+        externalId,
+        sourceUrl,
+        companyName,
+        title,
+        description: stripMarkup(getString(job.snippet)),
+        industry: '',
+        keywords: [],
+        location: getString(job.location),
+        employmentType: getString(job.type),
+        headcount: null,
+        publishedAt,
+        updatedAt: publishedAt,
+        expiresAt: null,
+        active: true,
+        collectedAt,
+      }),
+    ];
+  });
+}
+
 export function adaptSaraminResponse(
   response: unknown,
   collectedAt: string,
