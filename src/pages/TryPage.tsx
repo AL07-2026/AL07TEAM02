@@ -1,0 +1,572 @@
+import {
+  ArrowRight,
+  Building2,
+  ChartNoAxesCombined,
+  Check,
+  ChevronDown,
+  ExternalLink,
+  LoaderCircle,
+  Search,
+  Target,
+  TrendingUp,
+  UserRoundSearch,
+  Zap,
+} from 'lucide-react';
+import { type FormEvent, type ReactNode, useMemo, useState } from 'react';
+import { Link } from 'react-router';
+
+import { Button } from '@/components/ui/button';
+import type { CompanyRoleAnalysis, TrySearchRequest, TrySearchResponse } from '@/jobs/types';
+import { cn } from '@/lib/utils';
+
+type UserType = TrySearchRequest['role'];
+
+const userTypes: Array<{
+  value: UserType;
+  label: string;
+  description: string;
+  icon: typeof Target;
+}> = [
+  {
+    value: 'sales',
+    label: 'B2B 영업',
+    description: '구매 가능성이 높은 기업을 찾고 싶어요.',
+    icon: Target,
+  },
+  {
+    value: 'recruiter',
+    label: '헤드헌터',
+    description: '채용 수요가 커지는 기업을 찾고 싶어요.',
+    icon: UserRoundSearch,
+  },
+  {
+    value: 'investor',
+    label: '투자심사역',
+    description: '성장 신호가 보이는 기업을 찾고 싶어요.',
+    icon: ChartNoAxesCombined,
+  },
+];
+
+const intentPrompts: Record<
+  UserType,
+  { label: string; placeholder: string; helper: string; error: string }
+> = {
+  sales: {
+    label: '어떤 제품이나 서비스를 판매하나요?',
+    placeholder: '예: ATS 채용관리 솔루션',
+    helper: '제품과 연결되는 채용 변화가 있는 기업을 찾아드려요.',
+    error: '판매하는 제품이나 서비스를 입력해주세요.',
+  },
+  recruiter: {
+    label: '어떤 직무의 인재를 제안하나요?',
+    placeholder: '예: B2B 세일즈, 백엔드 개발자',
+    helper: '해당 직무의 채용 수요가 커지는 기업을 찾아드려요.',
+    error: '제안하려는 직무를 입력해주세요.',
+  },
+  investor: {
+    label: '어떤 기업에 관심이 있나요?',
+    placeholder: '예: B2B SaaS, 시리즈 A 성장 기업',
+    helper: '관심 분야와 성장 신호가 함께 나타나는 기업을 찾아드려요.',
+    error: '관심 있는 산업이나 성장 단계를 입력해주세요.',
+  },
+};
+
+const regionLabels: Record<string, string> = {
+  all: '지역 무관',
+  seoul: '서울',
+  gyeonggi: '경기',
+  busan: '부산',
+};
+
+type TrialForm = {
+  userType: UserType | '';
+  intent: string;
+  region: NonNullable<TrySearchRequest['region']>;
+};
+
+const initialForm: TrialForm = {
+  userType: '',
+  intent: '',
+  region: 'all',
+};
+
+function FieldLabel({ children, htmlFor }: { children: ReactNode; htmlFor: string }) {
+  return (
+    <label className="mb-2 block text-sm font-semibold text-[#142522]" htmlFor={htmlFor}>
+      {children}
+    </label>
+  );
+}
+
+function formatPostingDate(value: string) {
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(value));
+}
+
+function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number }) {
+  const roleFinding = match.roleFindings[0];
+  return (
+    <article className="group relative overflow-hidden rounded-2xl border border-[#cfe0dc] bg-white p-5 shadow-[0_12px_30px_-24px_rgba(17,74,64,0.38)] transition duration-300 hover:-translate-y-1 hover:border-[#68baa9] hover:shadow-[0_20px_42px_-26px_rgba(0,157,126,0.38)] sm:p-6">
+      <div className="absolute inset-y-0 left-0 w-1 bg-[#009d7e] opacity-0 transition-opacity group-hover:opacity-100" />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e2f4ef] text-[#009d7e]">
+            <Building2 aria-hidden="true" className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs font-bold tracking-[0.13em] text-[#7b879d]">
+              MATCH {String(rank).padStart(2, '0')}
+            </p>
+            <h3 className="truncate text-lg font-extrabold tracking-[-0.02em] text-[#101b31]">
+              {match.companyName}
+            </h3>
+          </div>
+        </div>
+        <span className="shrink-0 rounded-full bg-[#e1f5ef] px-3 py-1.5 text-xs font-bold text-[#007d65]">
+          추천 {rank}순위
+        </span>
+      </div>
+
+      <div className="mt-5 rounded-xl bg-[#e8f5f1] p-4">
+        <p className="flex items-center gap-2 text-sm font-bold text-[#00866c]">
+          <TrendingUp aria-hidden="true" className="size-4" />
+          현재 채용 상황
+        </p>
+        <p className="mt-2 text-sm leading-6 text-[#354c47]">{match.hiringSituation}</p>
+        {roleFinding ? (
+          <dl className="mt-4 grid grid-cols-2 gap-2 border-t border-[#cfe5df] pt-4 text-xs sm:grid-cols-3">
+            <div>
+              <dt className="text-[#71817d]">모집 직무</dt>
+              <dd className="mt-1 font-bold text-[#213832]">{roleFinding.name}</dd>
+            </div>
+            <div>
+              <dt className="text-[#71817d]">모집 인원</dt>
+              <dd className="mt-1 font-bold text-[#213832]">
+                {roleFinding.headcount ? `${roleFinding.headcount}명` : '인원 미기재'}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[#71817d]">근무 부서</dt>
+              <dd className="mt-1 font-bold text-[#213832]">
+                {roleFinding.department || '부서 미기재'}
+              </dd>
+            </div>
+          </dl>
+        ) : null}
+      </div>
+
+      <div className="mt-5">
+        <p className="text-xs font-extrabold tracking-[0.1em] text-[#7b879d]">추천한 이유</p>
+        <ul className="mt-3 space-y-3">
+          {match.recommendationReasons.map((reason, index) => (
+            <li className="flex gap-3 text-sm leading-6 text-[#35425a]" key={reason}>
+              <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[#009d7e] text-[11px] font-black text-white">
+                {index + 1}
+              </span>
+              <span>{reason}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-6 border-t border-[#dce8e5] pt-5">
+        <p className="text-xs font-extrabold tracking-[0.1em] text-[#7b879d]">판단 근거 공고</p>
+        <ul className="mt-3 space-y-2.5">
+          {match.evidence.map((evidence) => (
+            <li
+              className="rounded-xl border border-[#d7e7e3] bg-[#f8fbfa] p-3.5"
+              key={evidence.url}
+            >
+              <p className="text-sm font-bold leading-5 text-[#24332f]">{evidence.title}</p>
+              <p className="mt-1.5 text-xs leading-5 text-[#71817d]">
+                {formatPostingDate(evidence.publishedAt)} · {evidence.location || '지역 미기재'}
+                {roleFinding?.headcount
+                  ? ` · ${roleFinding.name} ${roleFinding.headcount}명`
+                  : evidence.headcount
+                    ? ` · 전체 ${evidence.headcount}명`
+                    : ''}
+              </p>
+              <a
+                className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#00866c] hover:underline"
+                href={evidence.url}
+                rel="noreferrer"
+                target="_blank"
+              >
+                공고 원문
+                <ExternalLink aria-hidden="true" className="size-3" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <Link
+        aria-label={`${match.companyName} 상세 분석 보기`}
+        className="mt-6 inline-flex w-full items-center justify-between rounded-xl bg-[#0c1715] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#19302b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-2"
+        state={{ analysis: match }}
+        to={`/result/${encodeURIComponent(match.companyName)}`}
+      >
+        상세 분석 보기
+        <ArrowRight aria-hidden="true" className="size-4" />
+      </Link>
+    </article>
+  );
+}
+
+export function TryPage() {
+  const [form, setForm] = useState<TrialForm>(initialForm);
+  const [submittedForm, setSubmittedForm] = useState<TrialForm | null>(null);
+  const [recommendations, setRecommendations] = useState<CompanyRoleAnalysis[]>([]);
+  const [postingCount, setPostingCount] = useState(0);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [showErrors, setShowErrors] = useState(false);
+  const selectedPrompt = form.userType ? intentPrompts[form.userType] : null;
+
+  const selectedConditions = useMemo(() => {
+    if (!submittedForm) return [];
+
+    return [
+      submittedForm.intent,
+      submittedForm.region !== 'all' ? regionLabels[submittedForm.region] : null,
+    ].filter((condition): condition is string => Boolean(condition));
+  }, [submittedForm]);
+
+  const isFormValid = Boolean(form.userType && form.intent.trim());
+
+  function updateField<K extends keyof TrialForm>(field: K, value: TrialForm[K]) {
+    setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function handleUserTypeChange(userType: UserType) {
+    setForm((current) => ({ ...current, userType, intent: '' }));
+    setSubmittedForm(null);
+    setRecommendations([]);
+    setSearchError('');
+    setShowErrors(false);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setShowErrors(true);
+
+    if (!isFormValid) return;
+
+    void searchCompanies({ ...form, intent: form.intent.trim() });
+  }
+
+  function clearOptionalFilters() {
+    const clearedForm: TrialForm = { ...form, region: 'all' };
+    setForm(clearedForm);
+    if (submittedForm) void searchCompanies({ ...clearedForm, intent: form.intent.trim() });
+  }
+
+  async function searchCompanies(searchForm: TrialForm) {
+    if (!searchForm.userType) return;
+    setIsSearching(true);
+    setSearchError('');
+
+    try {
+      const response = await fetch('/api/try/search', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          role: searchForm.userType,
+          query: searchForm.intent,
+          region: searchForm.region,
+        } satisfies TrySearchRequest),
+      });
+      const payload = (await response.json()) as TrySearchResponse | { error?: string };
+      if (!response.ok || !('matches' in payload)) {
+        throw new Error('error' in payload ? payload.error : '기업 검색에 실패했습니다.');
+      }
+
+      setRecommendations(payload.matches);
+      setPostingCount(payload.postingCount);
+      setSubmittedForm(searchForm);
+    } catch (error) {
+      setRecommendations([]);
+      setSubmittedForm(null);
+      setSearchError(error instanceof Error ? error.message : '기업 검색에 실패했습니다.');
+    } finally {
+      setIsSearching(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#dff5f0] text-[#101918]">
+      <header className="border-b border-[#cfe0dc] bg-white/90 backdrop-blur">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
+          <Link
+            className="group inline-flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-4"
+            to="/"
+          >
+            <span className="grid size-10 place-items-center rounded-xl bg-[#009d7e] text-white transition-transform group-hover:-rotate-3">
+              <Zap aria-hidden="true" className="size-5" />
+            </span>
+            <span className="text-lg font-black tracking-[-0.03em]">Signal Radar</span>
+          </Link>
+          <nav
+            aria-label="주요 메뉴"
+            className="flex items-center gap-5 text-sm font-semibold text-[#586864] sm:gap-8"
+          >
+            <Link className="hidden transition hover:text-[#009d7e] sm:block" to="/">
+              서비스
+            </Link>
+            <Link aria-current="page" className="text-[#009d7e]" to="/try">
+              체험하기
+            </Link>
+            <Link className="hidden transition hover:text-[#009d7e] sm:block" to="/result/flowdesk">
+              결과 분석
+            </Link>
+          </nav>
+        </div>
+      </header>
+
+      <main>
+        <section className="relative overflow-hidden border-b border-[#cfe0dc] px-5 py-8 sm:px-8 sm:py-12">
+          <div className="mx-auto max-w-4xl">
+            <form
+              aria-label="추천 기업 조건"
+              className="relative rounded-2xl border border-[#c8dcd7] bg-white p-5 shadow-[0_20px_55px_-35px_rgba(20,80,68,0.45)] sm:p-8"
+              noValidate
+              onSubmit={handleSubmit}
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-extrabold tracking-[0.15em] text-[#009d7e]">
+                    SIGNAL DISCOVERY
+                  </p>
+                  <h1 className="mt-2 text-2xl font-black tracking-[-0.035em] text-[#152139] sm:text-[1.75rem]">
+                    어떤 기업을 찾고 있나요?
+                  </h1>
+                  <p className="mt-2 text-sm leading-6 text-[#68748b]">
+                    역할과 찾는 목적만 알려주면 바로 추천해드려요.
+                  </p>
+                </div>
+                <span className="hidden rounded-full bg-[#f1f4fa] px-3 py-1.5 text-xs font-bold text-[#647087] sm:block">
+                  약 1분
+                </span>
+              </div>
+
+              <fieldset
+                className="mt-8"
+                aria-describedby={showErrors && !form.userType ? 'user-type-error' : undefined}
+              >
+                <legend className="text-sm font-bold text-[#18243b]">
+                  먼저, 나의 역할을 선택해주세요 <span className="text-[#df532d]">*</span>
+                </legend>
+                <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
+                  {userTypes.map(({ value, label, description, icon: Icon }) => (
+                    <label
+                      className={cn(
+                        'relative cursor-pointer rounded-xl border p-4 transition focus-within:ring-2 focus-within:ring-[#009d7e] focus-within:ring-offset-2',
+                        form.userType === value
+                          ? 'border-[#009d7e] bg-[#e5f5f1] shadow-[inset_0_0_0_1px_#009d7e]'
+                          : 'border-[#d7e3e0] bg-white hover:border-[#79bcae] hover:bg-[#f7fbfa]',
+                      )}
+                      key={value}
+                    >
+                      <input
+                        checked={form.userType === value}
+                        className="sr-only"
+                        name="userType"
+                        onChange={() => handleUserTypeChange(value)}
+                        type="radio"
+                        value={value}
+                      />
+                      <span className="flex items-start justify-between gap-3">
+                        <Icon aria-hidden="true" className="size-5 text-[#009d7e]" />
+                        <span
+                          className={cn(
+                            'grid size-5 place-items-center rounded-full border',
+                            form.userType === value
+                              ? 'border-[#009d7e] bg-[#009d7e] text-white'
+                              : 'border-[#c4d4d0] text-transparent',
+                          )}
+                        >
+                          <Check aria-hidden="true" className="size-3" />
+                        </span>
+                      </span>
+                      <span className="mt-4 block text-sm font-extrabold text-[#17233a]">
+                        {label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-[#69758b]">
+                        {description}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                {showErrors && !form.userType ? (
+                  <p className="mt-2 text-sm font-medium text-[#c44125]" id="user-type-error">
+                    나의 역할을 하나 선택해주세요.
+                  </p>
+                ) : null}
+              </fieldset>
+
+              <div className="my-7 h-px bg-[#dce8e5]" />
+
+              {selectedPrompt ? (
+                <div>
+                  <FieldLabel htmlFor="intent">
+                    {selectedPrompt.label} <span className="text-[#df532d]">*</span>
+                  </FieldLabel>
+                  <input
+                    aria-describedby={
+                      showErrors && !form.intent.trim() ? 'intent-error' : 'intent-helper'
+                    }
+                    aria-invalid={showErrors && !form.intent.trim()}
+                    className="h-13 w-full rounded-xl border border-[#cadbd7] bg-white px-4 text-sm text-[#273b36] outline-none transition placeholder:text-[#94a6a1] focus:border-[#009d7e] focus:ring-2 focus:ring-[#ccebe4] aria-[invalid=true]:border-[#df532d]"
+                    id="intent"
+                    onChange={(event) => updateField('intent', event.target.value)}
+                    placeholder={selectedPrompt.placeholder}
+                    type="text"
+                    value={form.intent}
+                  />
+                  {showErrors && !form.intent.trim() ? (
+                    <p
+                      className="mt-2 text-sm font-medium text-[#c44125]"
+                      id="intent-error"
+                      role="alert"
+                    >
+                      {selectedPrompt.error}
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-xs leading-5 text-[#78849a]" id="intent-helper">
+                      {selectedPrompt.helper}
+                    </p>
+                  )}
+
+                  <details className="group mt-6 rounded-xl border border-[#cfe0dc] bg-[#edf8f5]">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-sm font-bold text-[#344a45] outline-none transition hover:bg-[#e4f3ef] focus-visible:ring-2 focus-visible:ring-[#009d7e] [&::-webkit-details-marker]:hidden">
+                      <span>
+                        조건 더 추가하기
+                        <span className="ml-2 text-xs font-medium text-[#8994a7]">선택사항</span>
+                      </span>
+                      <ChevronDown
+                        aria-hidden="true"
+                        className="size-4 transition-transform group-open:rotate-180"
+                      />
+                    </summary>
+                    <div className="border-t border-[#cfe0dc] p-4">
+                      <div className="max-w-sm">
+                        <FieldLabel htmlFor="region">관심 지역</FieldLabel>
+                        <select
+                          className="h-11 w-full rounded-xl border border-[#cadbd7] bg-white px-3 text-sm text-[#273b36] outline-none transition focus:border-[#009d7e] focus:ring-2 focus:ring-[#ccebe4]"
+                          id="region"
+                          onChange={(event) =>
+                            updateField('region', event.target.value as TrialForm['region'])
+                          }
+                          value={form.region}
+                        >
+                          {Object.entries(regionLabels).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <p className="mt-3 text-xs leading-5 text-[#78849a]">
+                        기업 규모와 업종은 채용공고만으로 정확히 판단하기 어려워 검색 조건에서
+                        제외했습니다.
+                      </p>
+                    </div>
+                  </details>
+                </div>
+              ) : (
+                <p className="rounded-xl border border-dashed border-[#bcd5cf] bg-[#edf8f5] px-4 py-5 text-center text-sm text-[#627a74]">
+                  역할을 선택하면 맞춤 질문이 나타납니다.
+                </p>
+              )}
+
+              <Button
+                className="mt-7 h-13 w-full rounded-xl bg-[#009d7e] px-5 text-[15px] font-extrabold shadow-[0_12px_24px_-12px_rgba(0,157,126,0.7)] hover:bg-[#00846a]"
+                disabled={isSearching}
+                type="submit"
+              >
+                {isSearching ? (
+                  <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+                ) : (
+                  <Search aria-hidden="true" className="size-4" />
+                )}
+                {isSearching ? '기업 찾는 중...' : '기업 찾기'}
+                {isSearching ? null : <ArrowRight aria-hidden="true" className="size-4" />}
+              </Button>
+              {searchError ? (
+                <p className="mt-3 text-center text-sm font-semibold text-[#c44125]" role="alert">
+                  {searchError}
+                </p>
+              ) : null}
+              <p className="mt-3 text-center text-xs leading-5 text-[#7a869b]">
+                입력한 정보는 저장되지 않으며, 체험 결과 생성에만 사용됩니다.
+              </p>
+            </form>
+          </div>
+        </section>
+
+        {submittedForm ? (
+          <section aria-live="polite" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs font-extrabold tracking-[0.16em] text-[#009d7e]">
+                  SIGNAL MATCHES
+                </p>
+                <h2 className="mt-2 text-3xl font-black tracking-[-0.045em] text-[#111d33]">
+                  지금 확인할 기업 {recommendations.length}곳
+                </h2>
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#637087]">
+                  실제 채용공고 {postingCount}건을 분석해 입력 조건과 직접 연결되는 기업만
+                  정리했습니다.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2" aria-label="적용된 추천 조건">
+                  {selectedConditions.map((condition) => (
+                    <span
+                      className="rounded-full border border-[#bcd9d2] bg-white px-3 py-1.5 text-xs font-bold text-[#3f5b55]"
+                      key={condition}
+                    >
+                      {condition}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <button
+                className="self-start text-sm font-bold text-[#00866c] underline decoration-[#8dcabc] underline-offset-4 hover:text-[#006f59] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-4 sm:self-auto"
+                onClick={() => setSubmittedForm(null)}
+                type="button"
+              >
+                조건 다시 입력하기
+              </button>
+            </div>
+
+            {recommendations.length ? (
+              <div className="mt-8 grid gap-4 lg:grid-cols-3">
+                {recommendations.map((match, index) => (
+                  <ResultCard key={match.companyName} match={match} rank={index + 1} />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-8 rounded-2xl border border-dashed border-[#a9cec5] bg-white px-6 py-12 text-center">
+                <Search aria-hidden="true" className="mx-auto size-8 text-[#009d7e]" />
+                <h3 className="mt-4 text-lg font-extrabold text-[#17233a]">
+                  선택한 조건에 맞는 기업이 아직 없어요
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-[#69758b]">
+                  검색어를 더 구체적으로 입력하거나 지역 조건을 초기화해보세요.
+                </p>
+                <button
+                  className="mt-5 rounded-xl bg-[#009d7e] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#00846a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-2"
+                  onClick={clearOptionalFilters}
+                  type="button"
+                >
+                  선택 조건 초기화
+                </button>
+              </div>
+            )}
+          </section>
+        ) : null}
+      </main>
+    </div>
+  );
+}

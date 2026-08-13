@@ -4,11 +4,20 @@ node_modules/
 # build outputs
 dist/
 coverage/
+.firebase/
+
+# local Codex skills
+.agents/
 
 # local environment
 .env
 .env.local
 .env.*.local
+
+# local job-data pipeline output
+data/*.db*
+data/latest-analysis.json
+data/raw/
 
 # editors and operating systems
 .idea/

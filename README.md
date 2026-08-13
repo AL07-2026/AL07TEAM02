@@ -49,6 +49,22 @@ TanStack Query, Zustand, React Hook Form, Zod, Axios는 모든 프로젝트에 �
 - `npm run format`: 코드 포맷 정리
 - `npm run build`: 프로덕션 빌드
 
+## 채용공고 수집·분석
+
+외부 API 응답은 `server/jobPipeline.ts`의 `runJobPipeline`에 전달하면 공통 형식 변환, SQLite
+저장, 중복 제거, 기업별 신호 계산과 역할별 분석이 한 번에 실행됩니다. 현재 사람인 응답 형식과
+ALIO 매핑 형식, 공통 형식을 지원합니다.
+
+- `npm run jobs:demo`: 샘플 공고를 저장하고 B2B 영업 기준으로 분석
+- `npm run jobs:alio`: `ALIO_API_KEY` 환경변수로 진행 중인 ALIO 채용공고 수집·분석
+- `npm run jobs:import -- --source saramin --file response.json --role sales --query "ATS"`:
+  내려받은 API 응답을 저장·분석
+- 분석 역할: `sales`, `recruiter`, `investor`
+
+원본 응답은 `data/raw`, 최신 공고와 일별 스냅샷은 `data/job-signals.db`, 화면에 전달할 분석
+결과는 `data/latest-analysis.json`에 저장됩니다. API 키는 프론트엔드에 넣지 않고 서버의 수집
+코드에서만 사용해야 합니다.
+
 ## 주요 구조
 
 - `src/app`: 앱과 라우터

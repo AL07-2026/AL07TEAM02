@@ -9,6 +9,9 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
+    "jobs:import": "node server/importJobs.ts",
+    "jobs:demo": "node server/importJobs.ts --source normalized --file server/samples/jobs.json --collected-at 2026-08-12T00:00:00+09:00 --role sales --query \"ATS 채용관리\" --secondary \"인사 채용\"",
+    "jobs:alio": "node server/fetchAlioJobs.ts",
     "typecheck": "tsc --noEmit --pretty false",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
@@ -22,6 +25,7 @@
     "node": ">=22.22.2 <23 || >=24.15.0 <25"
   },
   "dependencies": {
+    "cfb": "1.2.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "lucide-react": "1.27.0",

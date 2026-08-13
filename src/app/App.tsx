@@ -3,6 +3,7 @@ import { createBrowserRouter, Link, Outlet } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
 import { Button } from '@/components/ui/button';
+import { TryPage } from '@/pages/TryPage';
 
 const navLinkClass =
   'rounded-sm transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
@@ -53,7 +54,10 @@ function HomePage() {
       <div className="w-full max-w-lg overflow-hidden rounded-md border border-border bg-card">
         <div className="h-4 bg-teal-400" />
         <div className="flex min-h-40 items-start gap-3 px-10 py-8">
-          <Button className="border-pink-200 bg-pink-100 text-pink-800 hover:bg-pink-200" variant="outline">
+          <Button
+            className="border-pink-200 bg-pink-100 text-pink-800 hover:bg-pink-200"
+            variant="outline"
+          >
             버튼1
           </Button>
         </div>
@@ -96,6 +100,7 @@ function NotFoundPage() {
 }
 
 const router = createBrowserRouter([
+  { path: '/try', Component: TryPage },
   {
     path: '/',
     Component: Layout,
