@@ -18,6 +18,9 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
+import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
+import { mockTargetCompany } from '@/features/apply/mock-target-company';
+
 declare global {
   interface Window {
     dataLayer?: Array<Record<string, unknown>>;
@@ -147,7 +150,7 @@ function DemoCard({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function App() {
+function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
   const demoRef = useRef<HTMLDivElement>(null);
@@ -587,4 +590,14 @@ function App() {
   );
 }
 
-export { App };
+export function App() {
+  const pathname = window.location.pathname.replace(/\/+$/, '');
+
+  if (pathname === '/apply') {
+    return (
+      <ColdEmailRequestPage targetCompany={import.meta.env.DEV ? mockTargetCompany : undefined} />
+    );
+  }
+
+  return <LandingPage />;
+}
