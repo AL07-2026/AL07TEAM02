@@ -72,7 +72,7 @@ describe('job analysis', () => {
 
     expect(sales?.breakdown).toHaveLength(4);
     expect(recruiter?.breakdown).toHaveLength(5);
-    expect(investor?.interpretation).toContain('투자 추천은 아닙니다');
+    expect(investor?.interpretation).toContain('성장 신호를 우선 확인할 기업');
   });
 
   it('제품과 직접 연결된 공고가 없으면 B2B 영업 점수를 신뢰도 이상으로 올리지 않는다', () => {

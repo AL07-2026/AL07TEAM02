@@ -110,7 +110,7 @@ async function enrichMatchedPostings(
 
   const initialMatches = analyzeCompanies(postings, request, now)
     .filter(hasDirectMatch)
-    .slice(0, 3);
+    .slice(0, 20);
   const evidenceUrls = new Set(initialMatches.flatMap((match) => match.evidenceUrls));
   const targets = postings.filter(
     (posting) =>
@@ -166,7 +166,7 @@ export async function searchTryCompanies(
   filteredPostings = await enrichMatchedPostings(filteredPostings, request, now);
   const matches = analyzeCompanies(filteredPostings, request, now)
     .filter(hasDirectMatch)
-    .slice(0, 3);
+    .slice(0, 20);
 
   return {
     collectedAt: Math.max(...postings.map((posting) => Date.parse(posting.collectedAt)))

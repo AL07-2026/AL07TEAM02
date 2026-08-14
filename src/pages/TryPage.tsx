@@ -12,8 +12,8 @@ import {
   UserRoundSearch,
   Zap,
 } from 'lucide-react';
-import { type FormEvent, type ReactNode, useMemo, useState } from 'react';
-import { Link } from 'react-router';
+import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { Button } from '@/components/ui/button';
 import type { CompanyRoleAnalysis, TrySearchRequest, TrySearchResponse } from '@/jobs/types';
@@ -105,41 +105,98 @@ function formatPostingDate(value: string) {
   }).format(new Date(value));
 }
 
+const companyNameTranslations: Record<string, string> = {
+  Amazon: '아마존',
+  Chadwick: '채드윅',
+  'Chadwick International': '채드윅 인터내셔널',
+  Cheiron: '카이론',
+  Coupang: '쿠팡',
+  Google: '구글',
+  Kakao: '카카오',
+  Microsoft: '마이크로소프트',
+  Toss: '토스',
+};
+
+const titleTranslations: Array<[string, string]> = [
+  ['Leave Replacement (Local Staff)', '휴직 대체인력 (현지 직원)'],
+  ['Leave Replacement', '휴직 대체인력'],
+  ['Registered Nurse (RN)', '간호사 (RN)'],
+  ['Software Engineer', '소프트웨어 엔지니어'],
+  ['Product Designer', '프로덕트 디자이너'],
+  ['Technical Product Owner', '기술 프로덕트 오너'],
+  ['Senior Frontend Engineer', '시니어 프론트엔드 엔지니어'],
+  ['Backend Engineer', '백엔드 엔지니어'],
+  ['Frontend Engineer', '프론트엔드 엔지니어'],
+  ['Server Developer', '서버 개발자'],
+  ['Developer', '개발자'],
+  ['Engineer', '엔지니어'],
+  ['Manager', '매니저'],
+  ['Coordinator', '코디네이터'],
+];
+
+function displayCompanyName(companyName: string) {
+  return companyNameTranslations[companyName] ?? companyName;
+}
+
+function displayPostingTitle(title: string) {
+  return titleTranslations.reduce(
+    (translated, [source, target]) => translated.replaceAll(source, target),
+    title,
+  );
+}
+
+function displayAnalysisText(text: string, companyName: string) {
+  return text.replaceAll(companyName, displayCompanyName(companyName));
+}
+
 function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number }) {
   const roleFinding = match.roleFindings[0];
+  const displayCompany = displayCompanyName(match.companyName);
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-[#cfe0dc] bg-white p-5 shadow-[0_12px_30px_-24px_rgba(17,74,64,0.38)] transition duration-300 hover:-translate-y-1 hover:border-[#68baa9] hover:shadow-[0_20px_42px_-26px_rgba(0,157,126,0.38)] sm:p-6">
-      <div className="absolute inset-y-0 left-0 w-1 bg-[#009d7e] opacity-0 transition-opacity group-hover:opacity-100" />
-      <div className="flex items-start justify-between gap-4">
+    <details className="group overflow-hidden rounded-2xl border border-[#c7ded8] bg-white shadow-[0_12px_30px_-24px_rgba(17,74,64,0.38)] transition hover:border-[#68baa9]">
+      <summary className="flex cursor-pointer list-none items-center gap-4 px-4 py-4 outline-none transition hover:bg-[#f7fbfa] focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-inset sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#e2f4ef] text-[#009d7e]">
+          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e2f4ef] text-[#009d7e]">
             <Building2 aria-hidden="true" className="size-5" />
           </div>
           <div className="min-w-0">
             <p className="text-xs font-bold tracking-[0.13em] text-[#7b879d]">
               MATCH {String(rank).padStart(2, '0')}
             </p>
-            <h3 className="truncate text-lg font-extrabold tracking-[-0.02em] text-[#101b31]">
-              {match.companyName}
+            <h3 className="truncate text-base font-extrabold tracking-[-0.02em] text-[#101b31] sm:text-lg">
+              {displayCompany}
             </h3>
           </div>
         </div>
-        <span className="shrink-0 rounded-full bg-[#e1f5ef] px-3 py-1.5 text-xs font-bold text-[#007d65]">
+        <p className="hidden min-w-0 flex-1 truncate text-sm text-[#405851] sm:block">
+          {displayAnalysisText(match.hiringSituation, match.companyName)}
+        </p>
+        <span className="ml-auto shrink-0 rounded-full bg-[#e1f5ef] px-3 py-1.5 text-xs font-bold text-[#007d65]">
           추천 {rank}순위
         </span>
-      </div>
+        <ChevronDown aria-hidden="true" className="size-5 shrink-0 text-[#64817a] transition group-open:rotate-180" />
+      </summary>
 
-      <div className="mt-5 rounded-xl bg-[#e8f5f1] p-4">
+      <div className="border-t border-[#dce8e5] p-4 sm:p-6">
+        <p className="mb-4 text-sm leading-6 text-[#405851] sm:hidden">
+          {displayAnalysisText(match.hiringSituation, match.companyName)}
+        </p>
+
+      <div className="rounded-xl bg-[#e8f5f1] p-4">
         <p className="flex items-center gap-2 text-sm font-bold text-[#00866c]">
           <TrendingUp aria-hidden="true" className="size-4" />
           현재 채용 상황
         </p>
-        <p className="mt-2 text-sm leading-6 text-[#354c47]">{match.hiringSituation}</p>
+        <p className="mt-2 text-sm leading-6 text-[#354c47]">
+          {displayAnalysisText(match.hiringSituation, match.companyName)}
+        </p>
         {roleFinding ? (
           <dl className="mt-4 grid grid-cols-2 gap-2 border-t border-[#cfe5df] pt-4 text-xs sm:grid-cols-3">
             <div>
               <dt className="text-[#71817d]">모집 직무</dt>
-              <dd className="mt-1 font-bold text-[#213832]">{roleFinding.name}</dd>
+              <dd className="mt-1 font-bold text-[#213832]">
+                {displayPostingTitle(roleFinding.name)}
+              </dd>
             </div>
             <div>
               <dt className="text-[#71817d]">모집 인원</dt>
@@ -158,6 +215,13 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
       </div>
 
       <div className="mt-5">
+        <p className="text-xs font-extrabold tracking-[0.1em] text-[#7b879d]">기업 상황 분석</p>
+        <p className="mt-2 text-sm leading-6 text-[#35425a]">
+          {displayAnalysisText(displayPostingTitle(match.interpretation), match.companyName)}
+        </p>
+      </div>
+
+      <div className="mt-5 border-t border-[#dce8e5] pt-5">
         <p className="text-xs font-extrabold tracking-[0.1em] text-[#7b879d]">추천한 이유</p>
         <ul className="mt-3 space-y-3">
           {match.recommendationReasons.map((reason, index) => (
@@ -165,25 +229,32 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
               <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-[#009d7e] text-[11px] font-black text-white">
                 {index + 1}
               </span>
-              <span>{reason}</span>
+              <span>{displayAnalysisText(reason, match.companyName)}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="mt-6 border-t border-[#dce8e5] pt-5">
-        <p className="text-xs font-extrabold tracking-[0.1em] text-[#7b879d]">판단 근거 공고</p>
+      <details className="mt-6 border-t border-[#dce8e5] pt-5">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-extrabold tracking-[0.1em] text-[#7b879d] outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] [&::-webkit-details-marker]:hidden">
+          <span>판단 근거 공고</span>
+          <span className="rounded-full bg-[#e8f5f1] px-3 py-1.5 tracking-normal text-[#00866c]">
+            {match.evidence.length}건 · 더보기
+          </span>
+        </summary>
         <ul className="mt-3 space-y-2.5">
           {match.evidence.map((evidence) => (
             <li
               className="rounded-xl border border-[#d7e7e3] bg-[#f8fbfa] p-3.5"
               key={evidence.url}
             >
-              <p className="text-sm font-bold leading-5 text-[#24332f]">{evidence.title}</p>
+              <p className="text-sm font-bold leading-5 text-[#24332f]">
+                {displayPostingTitle(evidence.title)}
+              </p>
               <p className="mt-1.5 text-xs leading-5 text-[#71817d]">
                 {formatPostingDate(evidence.publishedAt)} · {evidence.location || '지역 미기재'}
                 {roleFinding?.headcount
-                  ? ` · ${roleFinding.name} ${roleFinding.headcount}명`
+                  ? ` · ${displayPostingTitle(roleFinding.name)} ${roleFinding.headcount}명`
                   : evidence.headcount
                     ? ` · 전체 ${evidence.headcount}명`
                     : ''}
@@ -200,10 +271,10 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
             </li>
           ))}
         </ul>
-      </div>
+      </details>
 
       <Link
-        aria-label={`${match.companyName} 상세 분석 보기`}
+        aria-label={`${displayCompany} 상세 분석 보기`}
         className="mt-6 inline-flex w-full items-center justify-between rounded-xl bg-[#0c1715] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#19302b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-2"
         state={{ analysis: match }}
         to={`/result/${encodeURIComponent(match.companyName)}`}
@@ -211,11 +282,15 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
         상세 분석 보기
         <ArrowRight aria-hidden="true" className="size-4" />
       </Link>
-    </article>
+      </div>
+    </details>
   );
 }
 
 export function TryPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isResultsPage = location.pathname.endsWith('/results');
   const [form, setForm] = useState<TrialForm>(initialForm);
   const [submittedForm, setSubmittedForm] = useState<TrialForm | null>(null);
   const [recommendations, setRecommendations] = useState<CompanyRoleAnalysis[]>([]);
@@ -223,7 +298,12 @@ export function TryPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [showErrors, setShowErrors] = useState(false);
+  const [showAllResults, setShowAllResults] = useState(false);
   const selectedPrompt = form.userType ? intentPrompts[form.userType] : null;
+
+  useEffect(() => {
+    if (isResultsPage && !submittedForm) void navigate('/experience');
+  }, [isResultsPage, navigate, submittedForm]);
 
   const selectedConditions = useMemo(() => {
     if (!submittedForm) return [];
@@ -246,6 +326,7 @@ export function TryPage() {
     setRecommendations([]);
     setSearchError('');
     setShowErrors(false);
+    if (isResultsPage) void navigate('/experience');
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -286,6 +367,14 @@ export function TryPage() {
       setRecommendations(payload.matches);
       setPostingCount(payload.postingCount);
       setSubmittedForm(searchForm);
+      setShowAllResults(false);
+      void navigate('/experience/results', {
+        state: {
+          recommendations: payload.matches,
+          postingCount: payload.postingCount,
+          submittedForm: searchForm,
+        },
+      });
     } catch (error) {
       setRecommendations([]);
       setSubmittedForm(null);
@@ -326,6 +415,7 @@ export function TryPage() {
       </header>
 
       <main>
+        {!isResultsPage ? (
         <section className="relative overflow-hidden border-b border-[#cfe0dc] px-5 py-8 sm:px-8 sm:py-12">
           <div className="mx-auto max-w-4xl">
             <form
@@ -334,21 +424,13 @@ export function TryPage() {
               noValidate
               onSubmit={handleSubmit}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-extrabold tracking-[0.15em] text-[#009d7e]">
-                    SIGNAL DISCOVERY
-                  </p>
-                  <h1 className="mt-2 text-2xl font-black tracking-[-0.035em] text-[#152139] sm:text-[1.75rem]">
-                    어떤 기업을 찾고 있나요?
-                  </h1>
-                  <p className="mt-2 text-sm leading-6 text-[#68748b]">
-                    역할과 찾는 목적만 알려주면 바로 추천해드려요.
-                  </p>
-                </div>
-                <span className="hidden rounded-full bg-[#f1f4fa] px-3 py-1.5 text-xs font-bold text-[#647087] sm:block">
-                  약 1분
-                </span>
+              <div>
+                <h1 className="text-2xl font-black tracking-[-0.035em] text-[#152139] sm:text-[1.75rem]">
+                  어떤 기업을 찾고 있나요?
+                </h1>
+                <p className="mt-2 text-sm leading-6 text-[#68748b]">
+                  역할과 찾는 목적만 알려주면 바로 추천해드려요.
+                </p>
               </div>
 
               <fieldset
@@ -505,20 +587,18 @@ export function TryPage() {
             </form>
           </div>
         </section>
+        ) : null}
 
-        {submittedForm ? (
+        {isResultsPage && submittedForm ? (
           <section aria-live="polite" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs font-extrabold tracking-[0.16em] text-[#009d7e]">
-                  SIGNAL MATCHES
-                </p>
-                <h2 className="mt-2 text-3xl font-black tracking-[-0.045em] text-[#111d33]">
+                <h2 className="text-3xl font-black tracking-[-0.045em] text-[#0b1f1a]">
                   지금 확인할 기업 {recommendations.length}곳
                 </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#637087]">
-                  실제 채용공고 {postingCount}건을 분석해 입력 조건과 직접 연결되는 기업만
-                  정리했습니다.
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-[#36504b]">
+                  실제 채용공고 {postingCount}건을 분석해 입력 조건과 연결되는 기업을
+                  우선순위로 정리했습니다. 기업을 누르면 추천 근거와 상세 분석을 확인할 수 있습니다.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2" aria-label="적용된 추천 조건">
                   {selectedConditions.map((condition) => (
@@ -533,7 +613,11 @@ export function TryPage() {
               </div>
               <button
                 className="self-start text-sm font-bold text-[#00866c] underline decoration-[#8dcabc] underline-offset-4 hover:text-[#006f59] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-4 sm:self-auto"
-                onClick={() => setSubmittedForm(null)}
+                onClick={() => {
+                  setSubmittedForm(null);
+                  setRecommendations([]);
+                  void navigate('/experience');
+                }}
                 type="button"
               >
                 조건 다시 입력하기
@@ -541,11 +625,22 @@ export function TryPage() {
             </div>
 
             {recommendations.length ? (
-              <div className="mt-8 grid gap-4 lg:grid-cols-3">
-                {recommendations.map((match, index) => (
+              <>
+              <div className="mt-8 space-y-3">
+                {recommendations.slice(0, showAllResults ? recommendations.length : 10).map((match, index) => (
                   <ResultCard key={match.companyName} match={match} rank={index + 1} />
                 ))}
               </div>
+              {recommendations.length > 10 && !showAllResults ? (
+                <button
+                  className="mx-auto mt-6 rounded-full border border-[#9ecbc0] bg-white px-6 py-2.5 text-sm font-bold text-[#007d65] transition hover:bg-[#e8f5f1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-2"
+                  onClick={() => setShowAllResults(true)}
+                  type="button"
+                >
+                  더보기
+                </button>
+              ) : null}
+              </>
             ) : (
               <div className="mt-8 rounded-2xl border border-dashed border-[#a9cec5] bg-white px-6 py-12 text-center">
                 <Search aria-hidden="true" className="mx-auto size-8 text-[#009d7e]" />

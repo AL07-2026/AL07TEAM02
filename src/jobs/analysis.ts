@@ -164,6 +164,31 @@ function commonFacts(signal: CompanyHiringSignal) {
   ];
 }
 
+function situationInterpretation(
+  signal: CompanyHiringSignal,
+  relevant: NormalizedJobPosting[],
+  query: string,
+  roleFindings: JobRoleDetail[],
+) {
+  if (!relevant.length) {
+    return `‘${query}’와 직접 연결되는 공고 근거가 부족해 현재 상황을 단정하기 어렵습니다.`;
+  }
+
+  const activeCount = relevant.filter((posting) => posting.active).length;
+  const titleSummary = [...new Set(relevant.map((posting) => posting.title))].slice(0, 3).join(', ');
+  const departmentSummary = [...new Set(roleFindings.map((finding) => finding.department).filter(Boolean))]
+    .slice(0, 2)
+    .join(', ');
+  const trend =
+    signal.recentPostingCount > signal.previousPostingCount
+      ? '최근 채용 활동이 확대되는 흐름'
+      : signal.recentPostingCount < signal.previousPostingCount
+        ? '최근 채용 활동이 둔화된 흐름'
+        : '최근 채용 활동이 유지되는 흐름';
+  const detail = departmentSummary ? ` 확인된 부서는 ${departmentSummary}입니다.` : '';
+  return `${signal.companyName}은 ${trend}이며, ‘${query}’ 관련 공고 ${relevant.length}건 중 ${activeCount}건이 현재 진행 중입니다. 주요 공고는 ${titleSummary}입니다.${detail} 이를 종합하면 해당 직무를 즉시 충원하거나 조직 운영 공백을 메우려는 상황으로 보이며, 관련 조직의 확장 가능성이 있습니다.`;
+}
+
 function hiringSituation(
   signal: CompanyHiringSignal,
   relevant: NormalizedJobPosting[],
@@ -245,9 +270,7 @@ function analyzeSales(
     hiringSituation: hiringSituation(signal, relevant, request.query, roleFindings),
     recommendationReasons: reasons,
     observedFacts: commonFacts(signal),
-    interpretation: relevant.length
-      ? `‘${request.query}’와 연결되는 공고 ${relevant.length}건이 확인되어 영업 검토 우선순위가 높습니다.`
-      : `‘${request.query}’와 직접 연결되는 공고 근거가 부족합니다.`,
+    interpretation: situationInterpretation(signal, relevant, request.query, roleFindings),
     confidenceScore,
     riskFlags: signal.repostCount ? [`유사 재공고 ${signal.repostCount}개 확인`] : [],
     evidenceUrls: relevant.map((posting) => posting.sourceUrl),
@@ -309,7 +332,7 @@ function analyzeRecruiter(
     hiringSituation: hiringSituation(signal, relevant, request.query, roleFindings),
     recommendationReasons: reasons,
     observedFacts: commonFacts(signal),
-    interpretation: `‘${request.query}’ 관련 공고 ${relevant.length}건을 기준으로 인재 제안 가능성을 분석했습니다.`,
+    interpretation: situationInterpretation(signal, relevant, request.query, roleFindings),
     confidenceScore,
     riskFlags: relevant.length === 0 ? ['현재 확인된 관련 공고 없음'] : [],
     evidenceUrls: relevant.map((posting) => posting.sourceUrl),
@@ -343,7 +366,7 @@ function analyzeInvestor(
         signal.newJobFamilies.length
           ? `최근 새 직무군이 등장해 기존 인력 보충보다 사업 또는 조직 범위가 넓어지는 신호로 볼 수 있습니다.`
           : `최근 채용 활동이 이어지고 있어 조직 운영 변화 여부를 추가 조사할 가치가 있습니다.`,
-        `채용공고만으로 성장성과 투자 가치를 확정할 수 없으므로 후속 기업 조사가 필요합니다.`,
+        `채용 흐름과 신규 직무군을 종합하면 성장과 조직 확장이 진행되는 신호로 보입니다.`,
       ]
     : [`‘${request.query}’와 직접 연결되는 채용공고가 없어 추천 근거가 부족합니다.`];
 
@@ -360,7 +383,7 @@ function analyzeInvestor(
     hiringSituation: hiringSituation(signal, relevant, request.query, roleFindings),
     recommendationReasons: reasons,
     observedFacts: commonFacts(signal),
-    interpretation: `‘${request.query}’ 관점과 연결되는 공고 ${relevant.length}건을 확인했습니다. 채용 데이터 기반 추가 조사 우선순위이며 투자 추천은 아닙니다.`,
+    interpretation: `${situationInterpretation(signal, relevant, request.query, roleFindings)} 채용 흐름을 바탕으로 성장 신호를 우선 확인할 기업으로 분류했습니다.`,
     confidenceScore,
     riskFlags,
     evidenceUrls: relevant.map((posting) => posting.sourceUrl),
