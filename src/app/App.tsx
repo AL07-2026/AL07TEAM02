@@ -22,6 +22,9 @@ import { RouterProvider } from 'react-router/dom';
 
 import { TryPage } from '@/pages/TryPage';
 
+import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
+import { mockTargetCompany } from '@/features/apply/mock-target-company';
+
 declare global {
   interface Window {
     dataLayer?: Array<Record<string, unknown>>;
@@ -594,6 +597,12 @@ function LandingPage() {
 const router = createBrowserRouter([
   { path: '/try', Component: TryPage },
   { path: '/experience', Component: TryPage },
+  { path: '/experience/results', Component: TryPage },
+  { path: '/try/results', Component: TryPage },
+  {
+    path: '/apply',
+    element: <ColdEmailRequestPage targetCompany={import.meta.env.DEV ? mockTargetCompany : undefined} />,
+  },
   { path: '*', Component: LandingPage },
 ]);
 
