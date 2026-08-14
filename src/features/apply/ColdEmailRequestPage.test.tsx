@@ -5,6 +5,8 @@ import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
 import { mockTargetCompany } from '@/features/apply/mock-target-company';
 import { submitColdEmailRequest } from '@/features/apply/submit-cold-email-request';
 
+vi.mock('@/features/apply/apply-page.css', () => ({}));
+
 vi.mock('@/features/apply/submit-cold-email-request', () => ({
   submitColdEmailRequest: vi.fn(),
 }));
