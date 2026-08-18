@@ -21,6 +21,7 @@ import { createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
 import { TryPage } from '@/pages/TryPage';
+import { ResultDetailPage } from '@/pages/ResultDetailPage';
 
 import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
 import { mockTargetCompany } from '@/features/apply/mock-target-company';
@@ -598,7 +599,10 @@ const router = createBrowserRouter([
   { path: '/try', Component: TryPage },
   { path: '/experience', Component: TryPage },
   { path: '/experience/results', Component: TryPage },
+  { path: '/experience/results/detail', Component: ResultDetailPage },
   { path: '/try/results', Component: TryPage },
+  { path: '/results', Component: ResultDetailPage },
+  { path: '/result/:companyId', Component: ResultDetailPage },
   {
     path: '/apply',
     element: <ColdEmailRequestPage targetCompany={import.meta.env.DEV ? mockTargetCompany : undefined} />,
