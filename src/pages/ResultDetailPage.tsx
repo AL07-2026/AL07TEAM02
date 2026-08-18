@@ -178,10 +178,23 @@ export function ResultDetailPage() {
                 <Search aria-hidden="true" />
                 공고 원문
               </a>
-              <button className="primary-action" type="button">
+              <Link
+                className="primary-action"
+                state={{
+                  targetCompany: {
+                    id: companyId,
+                    name: companyName,
+                    industry: 'B2B 확장 기업',
+                    hiringChange: analysis.hiringSituation,
+                    expansionSignal: analysis.interpretation,
+                    recommendationReason: analysis.recommendationReasons[0],
+                  },
+                }}
+                to="/apply"
+              >
                 <Send aria-hidden="true" />
-                멘트 저장
-              </button>
+                콜드메일 신청
+              </Link>
             </div>
           </div>
 

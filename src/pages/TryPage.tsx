@@ -78,6 +78,22 @@ const regionLabels: Record<string, string> = {
   busan: '부산',
 };
 
+type SearchPayload = TrySearchResponse | { error?: string };
+
+async function readSearchPayload(response: Response): Promise<SearchPayload> {
+  const body = await response.text();
+
+  if (!body.trim()) {
+    throw new Error('검색 서버에서 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.');
+  }
+
+  try {
+    return JSON.parse(body) as SearchPayload;
+  } catch {
+    throw new Error('검색 서버의 응답 형식이 올바르지 않습니다. 잠시 후 다시 시도해주세요.');
+  }
+}
+
 type TrialForm = {
   userType: UserType | '';
   intent: string;
@@ -359,7 +375,7 @@ export function TryPage() {
           region: searchForm.region,
         } satisfies TrySearchRequest),
       });
-      const payload = (await response.json()) as TrySearchResponse | { error?: string };
+      const payload = await readSearchPayload(response);
       if (!response.ok || !('matches' in payload)) {
         throw new Error('error' in payload ? payload.error : '기업 검색에 실패했습니다.');
       }
