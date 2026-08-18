@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, useLocation } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 
 import { TryPage } from '@/pages/TryPage';
@@ -25,6 +25,7 @@ import { ResultDetailPage } from '@/pages/ResultDetailPage';
 
 import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
 import { mockTargetCompany } from '@/features/apply/mock-target-company';
+import type { TargetCompany } from '@/features/apply/types';
 
 declare global {
   interface Window {
@@ -595,6 +596,17 @@ function LandingPage() {
   );
 }
 
+function ApplyPageRoute() {
+  const location = useLocation();
+  const targetCompany = (location.state as { targetCompany?: TargetCompany } | null)?.targetCompany;
+
+  return (
+    <ColdEmailRequestPage
+      targetCompany={targetCompany ?? (import.meta.env.DEV ? mockTargetCompany : undefined)}
+    />
+  );
+}
+
 const router = createBrowserRouter([
   { path: '/try', Component: TryPage },
   { path: '/experience', Component: TryPage },
@@ -603,10 +615,7 @@ const router = createBrowserRouter([
   { path: '/try/results', Component: TryPage },
   { path: '/results', Component: ResultDetailPage },
   { path: '/result/:companyId', Component: ResultDetailPage },
-  {
-    path: '/apply',
-    element: <ColdEmailRequestPage targetCompany={import.meta.env.DEV ? mockTargetCompany : undefined} />,
-  },
+  { path: '/apply', Component: ApplyPageRoute },
   { path: '*', Component: LandingPage },
 ]);
 

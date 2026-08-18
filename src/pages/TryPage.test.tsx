@@ -131,4 +131,19 @@ describe('TryPage', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('수집된 채용공고가 없습니다.');
   });
+
+  it('검색 서버가 빈 응답을 반환하면 이해 가능한 오류를 표시한다', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 404 })));
+    renderPage();
+
+    fireEvent.click(screen.getByRole('radio', { name: /B2B 영업/ }));
+    fireEvent.change(screen.getByLabelText(/어떤 제품이나 서비스를 판매하나요/), {
+      target: { value: '클라우드 보안' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '기업 찾기' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '검색 서버에서 응답을 받지 못했습니다. 잠시 후 다시 시도해주세요.',
+    );
+  });
 });
