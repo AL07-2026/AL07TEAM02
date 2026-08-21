@@ -837,46 +837,72 @@ button:focus-visible {
   gap: 18px;
 }
 .compare-card {
+  min-height: 350px;
   padding: 30px;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 .compare-card > span {
+  display: block;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 800;
 }
 .compare-card h3 {
-  margin: 7px 0 25px;
-  font-size: 20px;
+  margin: 10px 0 24px;
+  font-size: 21px;
+  font-weight: 750;
+  letter-spacing: -0.5px;
 }
 .compare-card p {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 14px 0;
+  gap: 10px;
+  min-height: auto;
+  margin: 0;
+  padding: 10px 0;
   font-size: 13px;
+  font-weight: 550;
+  line-height: 1.55;
 }
 .compare-card svg {
   width: 16px;
   flex: 0 0 auto;
 }
 .before-card {
-  color: #7a8395;
-  border: 1px solid #e0e4eb;
-  background: #fff;
+  color: #654b43;
+  border: 1px solid #ebd8cf;
+  background: #fff9f5;
+  box-shadow: 0 10px 24px rgba(119, 74, 58, 0.05);
 }
-.before-card > span,
+.before-card > span {
+  color: #a3482c;
+}
+.before-card h3 {
+  color: #563a32;
+}
+.before-card p {
+  color: #70544b;
+}
 .before-card svg {
-  color: #a0a7b5;
+  color: #d26848;
 }
 .after-card {
-  color: #3f4a44;
-  border: 1px solid rgba(10, 135, 79, 0.2);
-  background: var(--indigo-soft);
-  box-shadow: none;
+  color: #064f4b;
+  border: 1px solid #079a92;
+  background: #dff7f4;
+  box-shadow: 0 10px 24px rgba(8, 179, 170, 0.08);
 }
-.after-card > span,
+.after-card > span {
+  color: var(--brand-dark);
+}
+.after-card h3 {
+  color: #073f3c;
+}
+.after-card p {
+  color: #064f4b;
+  font-weight: 650;
+}
 .after-card svg {
-  color: var(--indigo);
+  color: var(--brand-dark);
 }
 .steps {
   display: flex;
@@ -1495,6 +1521,9 @@ button:focus-visible {
   .comparison,
   .principles-grid {
     grid-template-columns: 1fr;
+  }
+  .compare-card {
+    min-height: 0;
   }
   .steps {
     flex-direction: column;
