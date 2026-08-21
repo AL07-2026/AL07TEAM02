@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ChevronRight,
   CircleAlert,
+  CircleHelp,
   FileSearch,
   Menu,
   Radar,
@@ -110,6 +111,19 @@ function Logo() {
   );
 }
 
+function MetricHelp({ description }: { description: string }) {
+  return (
+    <button
+      aria-label={description}
+      className="metric-help"
+      data-tooltip={description}
+      type="button"
+    >
+      <CircleHelp aria-hidden="true" />
+    </button>
+  );
+}
+
 function DemoCard({ compact = false }: { compact?: boolean }) {
   return (
     <article className={compact ? 'demo-card compact' : 'demo-card'}>
@@ -125,17 +139,23 @@ function DemoCard({ compact = false }: { compact?: boolean }) {
       <div className="demo-metrics">
         <div>
           <span>제품 연관도</span>
-          <strong>87%</strong>
+          <strong className="metric-value">
+            87%
+            <MetricHelp description="입력한 제품과 채용 변화의 키워드 연관성을 나타내는 데모 점수입니다." />
+          </strong>
+          <small className="metric-basis">제품·채용 키워드 일치도</small>
         </div>
         <div>
           <span>최근 30일 채용</span>
           <strong>15건</strong>
+          <small className="metric-basis">최근 30일 등록 공고</small>
         </div>
         <div>
           <span>전월 대비</span>
           <strong className="positive">
             <TrendingUp /> +8건
           </strong>
+          <small className="metric-basis">직전 30일과 비교</small>
         </div>
       </div>
 
@@ -218,7 +238,7 @@ function LandingPage() {
               이용 방법
             </a>
             <a className="header-cta" href="/experience" onClick={() => trackTrial('header')}>
-              무료 체험 <ArrowRight />
+              무료 체험 시작하기 <ArrowRight />
             </a>
           </nav>
           <button
@@ -242,11 +262,12 @@ function LandingPage() {
               <span className="eyebrow">
                 <Sparkles /> B2B 영업을 위한 채용 데이터 인텔리전스
               </span>
-              <h1>
-                채용공고 속에서
-                <br />
-                <em>지금 접근할 기업</em>을<br />
-                찾아드립니다.
+              <h1 className="hero-message-card">
+                <span>채용공고 속에서</span>
+                <em>지금 연락할 기업을</em>
+                <span className="headline-last-line">
+                  찾아드립니다 <ArrowRight aria-hidden="true" />
+                </span>
               </h1>
               <p>
                 자사 제품을 입력하면 기업의 채용 변화를 분석해
@@ -254,7 +275,7 @@ function LandingPage() {
               </p>
               <div className="hero-actions">
                 <a className="primary-button" href="/experience" onClick={() => trackTrial('hero')}>
-                  회원가입 없이 무료 체험 <ArrowRight />
+                  무료 체험 시작하기 <ArrowRight />
                 </a>
                 <span>
                   <CheckCircle2 /> 약 1분 소요 · 추천 기업 3곳 무료 확인
@@ -291,7 +312,7 @@ function LandingPage() {
                     <span />
                   </div>
                   <strong>오늘의 영업 시그널</strong>
-                  <span className="demo-label">DEMO</span>
+                  <span className="demo-label">예시 데이터</span>
                 </div>
                 <div className="demo-content">
                   <div className="demo-heading">
@@ -300,6 +321,13 @@ function LandingPage() {
                       <h2>지금 주목할 기업</h2>
                     </div>
                     <span>3개 발견</span>
+                  </div>
+                  <div className="demo-data-notice">
+                    <CircleAlert aria-hidden="true" />
+                    <p>
+                      <strong>예시 화면입니다.</strong> 실제 구매 의도가 아닌 채용정보 기반
+                      추정치입니다.
+                    </p>
                   </div>
                   <DemoCard compact />
                   <div className="mini-company">
@@ -332,14 +360,14 @@ function LandingPage() {
                   <TrendingUp />
                 </span>
                 <div>
-                  <strong>+42%</strong>
-                  <small>이번 주 신규 시그널</small>
+                  <span className="floating-signal-value">
+                    <strong>+42%</strong>
+                    <b>전주 대비</b>
+                    <MetricHelp description="지난주 대비 새로 탐지된 채용 기반 영업 신호의 증가율을 나타내는 데모 수치입니다." />
+                  </span>
+                  <small>새로 탐지된 채용 기반 신호</small>
                 </div>
               </div>
-              <p className="demo-disclaimer">
-                <CircleAlert /> 데모 예시입니다. 채용정보를 기반으로 한 추정이며 실제 구매 의도를
-                의미하지 않습니다.
-              </p>
             </div>
           </div>
         </section>
@@ -364,11 +392,10 @@ function LandingPage() {
           <div className="container problem-grid">
             <div className="section-heading">
               <span className="section-label">THE PROBLEM</span>
-              <h2>
-                잠재고객을 찾는 데<br />
-                너무 많은 시간을
-                <br />
-                쓰고 있나요?
+              <h2 className="problem-message-card">
+                <span>잠재고객을 찾는 데</span>
+                <em>너무 많은 시간을</em>
+                <span>쓰고 있나요?</span>
               </h2>
               <p>
                 영업 담당자는 새로운 잠재고객을 찾기 위해 여러 채용 사이트를 검색하고, 기업 목록을
@@ -475,7 +502,7 @@ function LandingPage() {
             </div>
             <div className="final-cta-action">
               <a href="/experience" onClick={() => trackTrial('footer')}>
-                무료로 기업 찾아보기 <ArrowRight />
+                무료 체험 시작하기 <ArrowRight />
               </a>
               <span>회원가입 없음 · 결제정보 없음 · 약 1분 소요</span>
             </div>
@@ -586,7 +613,7 @@ function LandingPage() {
                 미리보기 닫기
               </button>
               <a href="/experience" onClick={() => trackTrial('hero')}>
-                내 제품으로 무료 체험 <ArrowRight />
+                무료 체험 시작하기 <ArrowRight />
               </a>
             </footer>
           </section>
