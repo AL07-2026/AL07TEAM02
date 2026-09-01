@@ -18,6 +18,7 @@ coverage/
 data/*.db*
 data/latest-analysis.json
 data/raw/
+data/*.jsonl
 
 # editors and operating systems
 .idea/
@@ -36,3 +37,5 @@ pnpm-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+
+.vercel

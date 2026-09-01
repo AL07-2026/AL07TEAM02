@@ -64,6 +64,10 @@ describe('TryPage', () => {
   it('필수 조건이 없으면 입력 안내를 표시한다', () => {
     renderPage();
 
+    expect(screen.queryByRole('radio', { name: /B2B 영업/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: /투자심사역/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /헤드헌터/ })).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole('button', { name: '기업 찾기' }));
 
     expect(screen.getByText('나의 역할을 하나 선택해주세요.')).toBeInTheDocument();
@@ -73,9 +77,9 @@ describe('TryPage', () => {
     mockSearchResponse();
     renderPage();
 
-    fireEvent.click(screen.getByRole('radio', { name: /B2B 영업/ }));
-    fireEvent.change(screen.getByLabelText(/어떤 제품이나 서비스를 판매하나요/), {
-      target: { value: 'ATS 채용관리 솔루션' },
+    fireEvent.click(screen.getByRole('radio', { name: /헤드헌터/ }));
+    fireEvent.change(screen.getByLabelText(/어떤 직무의 인재를 제안하나요/), {
+      target: { value: '간호사' },
     });
     fireEvent.click(screen.getByRole('button', { name: '기업 찾기' }));
 
@@ -123,9 +127,9 @@ describe('TryPage', () => {
     );
     renderPage();
 
-    fireEvent.click(screen.getByRole('radio', { name: /투자심사역/ }));
-    fireEvent.change(screen.getByLabelText(/어떤 기업에 관심이 있나요/), {
-      target: { value: '헬스케어' },
+    fireEvent.click(screen.getByRole('radio', { name: /헤드헌터/ }));
+    fireEvent.change(screen.getByLabelText(/어떤 직무의 인재를 제안하나요/), {
+      target: { value: '간호사' },
     });
     fireEvent.click(screen.getByRole('button', { name: '기업 찾기' }));
 
@@ -136,9 +140,9 @@ describe('TryPage', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 404 })));
     renderPage();
 
-    fireEvent.click(screen.getByRole('radio', { name: /B2B 영업/ }));
-    fireEvent.change(screen.getByLabelText(/어떤 제품이나 서비스를 판매하나요/), {
-      target: { value: '클라우드 보안' },
+    fireEvent.click(screen.getByRole('radio', { name: /헤드헌터/ }));
+    fireEvent.change(screen.getByLabelText(/어떤 직무의 인재를 제안하나요/), {
+      target: { value: '백엔드 개발자' },
     });
     fireEvent.click(screen.getByRole('button', { name: '기업 찾기' }));
 

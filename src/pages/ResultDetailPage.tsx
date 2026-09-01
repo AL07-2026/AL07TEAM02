@@ -6,16 +6,17 @@ import {
   CalendarDays,
   ChartNoAxesCombined,
   CircleDollarSign,
+  ArrowRight,
   LineChart,
   Mail,
   MapPin,
+  Radar,
   Search,
   Send,
   Sparkles,
-  Target,
   TrendingUp,
   Users,
-  Zap,
+  UserCog,
   type LucideIcon,
 } from 'lucide-react';
 import { Link, useLocation, useParams } from 'react-router';
@@ -139,30 +140,34 @@ export function ResultDetailPage() {
   );
 
   return (
-    <main className="result-dashboard">
-      <div className="result-shell">
-        <aside className="result-sidebar" aria-label="결과 분석 메뉴">
-          <div className="result-brand">
-            <span>
-              <Zap aria-hidden="true" />
+    <div className="result-page">
+      <header className="site-header">
+        <div className="container header-inner">
+          <Link className="brand" to="/" aria-label="세일즈 시그널 홈">
+            <span className="brand-symbol" aria-hidden="true">
+              <Radar />
             </span>
-            Signal Radar
-          </div>
-          <nav className="result-menu">
-            {['대시보드', '추천 기업', '채용 변화', '콜드메일', '설정'].map((item, index) => (
-              <button className={index === 0 ? 'active' : ''} key={item} type="button">
-                {index === 0 ? <ChartNoAxesCombined aria-hidden="true" /> : <Target aria-hidden="true" />}
-                {item}
-              </button>
-            ))}
+            <span>세일즈 시그널</span>
+          </Link>
+          <nav aria-label="주요 메뉴" className="site-nav experience-nav">
+            <Link to="/">서비스 소개</Link>
+            <Link to="/#how">이용 방법</Link>
+            <Link className="header-cta" to="/experience">
+              무료 체험 <ArrowRight />
+            </Link>
+            <Link
+              aria-label="관리자 페이지"
+              className="admin-shortcut"
+              title="관리자 페이지"
+              to="/admin/cold-email-requests"
+            >
+              <UserCog aria-hidden="true" />
+            </Link>
           </nav>
-          <div className="weekly-scan-card">
-            <p>이번 주 스캔</p>
-            <strong>1,284</strong>
-            <span>공개 ATS 공고에서 확장 신호를 추출했습니다.</span>
-          </div>
-        </aside>
-
+        </div>
+      </header>
+      <main className="result-dashboard">
+        <div className="container result-shell">
         <section className="result-content">
           <div className="result-topbar">
             <div>
@@ -170,6 +175,9 @@ export function ResultDetailPage() {
                 <ArrowLeft aria-hidden="true" />
                 추천 기업으로 돌아가기
               </Link>
+              <span className="eyebrow result-eyebrow">
+                <ChartNoAxesCombined /> 기업 상세 분석
+              </span>
               <h1>{companyName} 상세 분석</h1>
               <p>입력 조건 기준으로 채용 변화, 확장 신호, 추천 소구점을 정리했습니다.</p>
             </div>
@@ -181,6 +189,7 @@ export function ResultDetailPage() {
               <Link
                 className="primary-action"
                 state={{
+                  applicantRole: analysis.role,
                   targetCompany: {
                     id: companyId,
                     name: companyName,
@@ -293,7 +302,8 @@ export function ResultDetailPage() {
           </div>
         </section>
       </div>
-    </main>
+      </main>
+    </div>
   );
 }
 

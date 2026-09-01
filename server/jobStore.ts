@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-import type { JobSource, NormalizedJobPosting } from '../src/jobs/types.ts';
+import type { JobSource, NormalizedJobPosting } from '../src/jobs/types.js';
 
 export type ImportSummary = {
   received: number;

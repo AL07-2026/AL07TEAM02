@@ -1,5 +1,5 @@
-import { normalizeJobPosting } from './normalize.ts';
-import type { NormalizedJobInput, NormalizedJobPosting } from './types.ts';
+import { normalizeJobPosting } from './normalize.js';
+import type { NormalizedJobInput, NormalizedJobPosting } from './types.js';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -54,6 +54,25 @@ function alioDate(value: string | null | undefined) {
     return `${value.slice(0, 4)}-${value.slice(4, 6)}-${value.slice(6, 8)}T00:00:00+09:00`;
   }
   return value;
+}
+
+function work24Date(value: unknown) {
+  const date = getString(value).trim();
+  if (/^\d{8}$/.test(date)) {
+    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}T00:00:00+09:00`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return `${date}T00:00:00+09:00`;
+  if (/^\d{14}$/.test(date)) {
+    return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}T${date.slice(8, 10)}:${date.slice(10, 12)}:${date.slice(12, 14)}+09:00`;
+  }
+  return null;
+}
+
+function getWork24Jobs(response: unknown) {
+  const root = getRecord(response, 'dhsOpenEmpInfoList');
+  const rawJobs = root?.dhsOpenEmpInfo;
+  if (Array.isArray(rawJobs)) return rawJobs.filter(isRecord);
+  return isRecord(rawJobs) ? [rawJobs] : [];
 }
 
 function getSaraminJobs(response: unknown) {
@@ -147,6 +166,50 @@ export function adaptSaraminResponse(
       active: Number(job.active) === 1,
       collectedAt,
     });
+  });
+}
+
+export function adaptWork24Response(
+  response: unknown,
+  collectedAt: string,
+): NormalizedJobPosting[] {
+  if (!isRecord(response) || !isRecord(response.dhsOpenEmpInfoList)) {
+    throw new Error('고용24 공채속보 목록이 없습니다.');
+  }
+
+  return getWork24Jobs(response).flatMap((job) => {
+    const externalId = getString(job.empSeqno).trim();
+    const companyName = getString(job.empBusiNm).trim();
+    const title = getString(job.empWantedTitle).trim();
+    const publishedAt = work24Date(job.empWantedStdt);
+    if (!externalId || !companyName || !title || !publishedAt) return [];
+
+    const sourceUrl =
+      getString(job.empWantedHomepgDetail).trim() ||
+      `https://www.work24.go.kr/wk/a/b/1500/empDetailAuthView.do?wantedAuthNo=${encodeURIComponent(externalId)}&infoTypeCd=OEW&infoTypeGroup=tb_workinfoopen`;
+    const companyType = getString(job.coClcdNm).trim();
+    const employmentType = getString(job.empWantedTypeNm).trim();
+
+    return [
+      normalizeJobPosting({
+        source: 'work24',
+        externalId,
+        sourceUrl,
+        companyName,
+        title,
+        description: [companyType, employmentType].filter(Boolean).join(' · '),
+        industry: companyType,
+        keywords: [],
+        location: '',
+        employmentType,
+        headcount: null,
+        publishedAt,
+        updatedAt: null,
+        expiresAt: work24Date(job.empWantedEndt),
+        active: true,
+        collectedAt,
+      }),
+    ];
   });
 }
 

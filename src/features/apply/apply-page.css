@@ -2,7 +2,11 @@
   min-width: 320px;
   min-height: 100vh;
   color: #171717;
-  background: #fff;
+  background-color: #fcfdfc;
+  background-image:
+    linear-gradient(rgba(23, 23, 23, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 23, 23, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
   font-family: Pretendard, 'Noto Sans KR', Inter, ui-sans-serif, system-ui, sans-serif;
   font-size: 16px;
 }
@@ -52,7 +56,7 @@
   color: #171717;
   border: 1px solid rgba(10, 135, 79, 0.28);
   border-radius: 7px;
-  background: #72e3ad;
+  background: #78e3dc;
 }
 
 .apply-brand-symbol svg,
@@ -72,9 +76,45 @@
   color: #0a874f;
 }
 
+.apply-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.apply-admin-shortcut {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #3f4a47;
+  border: 1px solid rgba(23, 23, 23, 0.16);
+  border-radius: 6px;
+  background: #fff;
+  text-decoration: none;
+}
+
+.apply-admin-shortcut:hover {
+  color: #0a874f;
+  border-color: rgba(10, 135, 79, 0.45);
+  background: #f3fbf7;
+}
+
+.apply-admin-shortcut:focus-visible {
+  outline: 2px solid #0a874f;
+  outline-offset: 2px;
+}
+
+.apply-admin-shortcut svg {
+  width: 19px;
+  height: 19px;
+}
+
 .apply-progress {
   border-bottom: 1px solid rgba(23, 23, 23, 0.1);
-  background: #f8f9f8;
+  background: rgba(248, 249, 248, 0.92);
+  backdrop-filter: blur(12px);
 }
 
 .apply-progress-inner {
@@ -110,12 +150,12 @@
 }
 
 .apply-progress-inner strong {
-  color: #087a48;
+  color: #087a74;
   font-weight: 650;
 }
 
 .apply-progress-inner small {
-  color: #087a48;
+  color: #087a74;
   font-size: 11px;
   font-weight: 650;
 }
@@ -123,7 +163,7 @@
 .apply-page {
   min-height: calc(100vh - 119px);
   padding: 66px 0 88px;
-  background: #fcfdfc;
+  background: transparent;
 }
 
 .apply-content {
@@ -143,10 +183,10 @@
   gap: 7px;
   margin: 0 0 18px;
   padding: 7px 11px;
-  color: #087a48;
-  border: 1px solid rgba(10, 135, 79, 0.18);
+  color: #087a74;
+  border: 1px solid rgba(8, 179, 170, 0.32);
   border-radius: 999px;
-  background: rgba(114, 227, 173, 0.12);
+  background: #e8f8f6;
   font-size: 12px;
   font-weight: 600;
 }
@@ -157,10 +197,19 @@
 
 .apply-intro h1 {
   margin: 0;
-  font-size: 50px;
-  line-height: 1.12;
-  letter-spacing: -1.8px;
-  font-weight: 580;
+  width: max-content;
+  max-width: 100%;
+  padding: 29px 32px 32px;
+  color: #fff;
+  border: 1px solid #079a92;
+  border-radius: 13px;
+  background: #08b3aa;
+  box-shadow: 0 14px 28px rgba(8, 179, 170, 0.16);
+  font-family: Pretendard, 'Noto Sans KR', sans-serif;
+  font-size: clamp(32px, 3vw, 42px);
+  line-height: 1.36;
+  letter-spacing: -0.6px;
+  font-weight: 700;
   word-break: keep-all;
 }
 
@@ -175,9 +224,10 @@
 .apply-company-card,
 .apply-form-card,
 .apply-success-card {
-  border: 1px solid rgba(23, 23, 23, 0.12);
+  border: 1px solid rgba(8, 179, 170, 0.3);
   border-radius: 8px;
   background: #fff;
+  box-shadow: 0 10px 30px rgba(8, 179, 170, 0.07);
 }
 
 .apply-company-card {
@@ -194,7 +244,7 @@
 
 .apply-card-heading > div > span,
 .apply-form-heading > div > span {
-  color: #0a874f;
+  color: #087a74;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 1.2px;
@@ -209,9 +259,9 @@
 
 .apply-priority {
   padding: 6px 9px;
-  color: #087a48;
+  color: #dc642f;
   border-radius: 6px;
-  background: #effcf6;
+  background: #fff0e9;
   font-size: 10px;
   font-weight: 650;
 }
@@ -232,9 +282,9 @@
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  color: #087a48;
+  color: #073f3c;
   border-radius: 7px;
-  background: #effcf6;
+  background: #78e3dc;
 }
 
 .apply-company-icon svg {
@@ -258,7 +308,7 @@
   padding: 14px;
   border: 1px solid #e8ebe9;
   border-radius: 7px;
-  background: #fafbfa;
+  background: #fffefa;
 }
 
 .apply-signal-wide {
@@ -269,7 +319,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #087a48;
+  color: #087a74;
   font-size: 10px;
   font-weight: 650;
 }
@@ -351,17 +401,17 @@
 .apply-process-box {
   margin-top: 28px;
   padding: 18px;
-  border: 1px solid rgba(10, 135, 79, 0.18);
+  border: 1px solid #ead8b8;
   border-radius: 7px;
-  background: #effcf6;
+  background: #fff9df;
 }
 
 .apply-process-box h3 {
-  color: #28533f;
+  color: #073f3c;
 }
 
 .apply-process-box svg {
-  color: #0a874f;
+  color: #087a74;
 }
 
 .apply-submit-button {
@@ -369,15 +419,15 @@
   min-height: 54px;
   margin-top: 24px;
   color: #fff;
-  border: 1px solid #2f2f2f;
+  border: 1px solid #075e5a;
   border-radius: 6px;
-  background: #191919;
+  background: #075e5a;
   font-size: 14px;
   font-weight: 600;
 }
 
 .apply-submit-button:hover:not(:disabled) {
-  background: #2b2b2b;
+  background: #054d49;
 }
 
 .apply-submit-button:focus-visible {
@@ -397,7 +447,7 @@
   display: grid;
   place-items: center;
   padding: 60px 20px;
-  background: #f8f9f8;
+  background: transparent;
 }
 
 .apply-success-card {
@@ -412,9 +462,9 @@
   display: grid;
   margin: 0 auto 20px;
   place-items: center;
-  color: #087a48;
+  color: #087a74;
   border-radius: 50%;
-  background: #dff7eb;
+  background: #dff7f4;
 }
 
 .apply-success-icon svg {
@@ -481,8 +531,10 @@
   }
 
   .apply-intro h1 {
-    font-size: 34px;
-    letter-spacing: -1.3px;
+    width: 100%;
+    padding: 26px 22px 29px;
+    font-size: 29px;
+    letter-spacing: -0.4px;
   }
 
   .apply-card-heading,

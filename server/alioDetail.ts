@@ -1,5 +1,5 @@
-import type { JobRoleDetail, NormalizedJobPosting } from '../src/jobs/types.ts';
-import { extractHwpText } from './hwpText.ts';
+import type { JobRoleDetail, NormalizedJobPosting } from '../src/jobs/types.js';
+import { extractHwpText } from './hwpText.js';
 
 type AlioStep = { sortNo?: number; recrutPbancTtl?: string };
 type AlioFile = { atchFileNm?: string; url?: string; sortNo?: number };

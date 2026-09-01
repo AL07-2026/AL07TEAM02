@@ -1,24 +1,28 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
-import { analyzeCompanies } from '../src/jobs/analysis.ts';
+import { analyzeCompanies } from '../src/jobs/analysis.js';
 import type {
   AnalysisRole,
   NormalizedJobPosting,
   TrySearchRequest,
   TrySearchResponse,
-} from '../src/jobs/types.ts';
-import { fetchAlioJobs } from './alioClient.ts';
-import { fetchAlioJobDetail } from './alioDetail.ts';
-import { JobStore } from './jobStore.ts';
-import { runJobPipeline } from './jobPipeline.ts';
-import { fetchJoobleJobs } from './joobleClient.ts';
+} from '../src/jobs/types.js';
+import { fetchAlioJobs } from './alioClient.js';
+import { fetchAlioJobDetail } from './alioDetail.js';
+import { JobStore } from './jobStore.js';
+import { runJobPipeline } from './jobPipeline.js';
+import { fetchJoobleJobs } from './joobleClient.js';
+import { fetchWork24Jobs } from './work24Client.js';
 
-const databasePath = resolve('data/job-signals.db');
+const dataRoot = process.env.VERCEL ? resolve(tmpdir(), 'job-signals') : resolve('data');
+const databasePath = resolve(dataRoot, 'job-signals.db');
 const refreshInterval = 6 * 60 * 60 * 1000;
 const roles: AnalysisRole[] = ['sales', 'recruiter', 'investor'];
 const regionTerms = { seoul: '서울', gyeonggi: '경기', busan: '부산' } as const;
 const joobleRefreshes = new Map<string, number>();
+let lastWork24Refresh = 0;
 
 function validateRequest(value: unknown): TrySearchRequest {
   if (typeof value !== 'object' || value === null) throw new Error('검색 조건이 필요합니다.');
@@ -89,7 +93,7 @@ async function refreshJoobleIfNeeded(request: TrySearchRequest, now: Date) {
     location: request.region && request.region !== 'all' ? regionTerms[request.region] : '',
   });
   const collectedAt = now.toISOString();
-  const rawDirectory = resolve('data/raw/jooble');
+  const rawDirectory = resolve(dataRoot, 'raw/jooble');
   mkdirSync(rawDirectory, { recursive: true });
   writeFileSync(
     resolve(rawDirectory, `${collectedAt.replace(/[:.]/g, '-')}.json`),
@@ -98,6 +102,25 @@ async function refreshJoobleIfNeeded(request: TrySearchRequest, now: Date) {
   );
   runJobPipeline({ source: 'jooble', payload, collectedAt, databasePath });
   joobleRefreshes.set(searchKey, now.getTime());
+}
+
+async function refreshWork24IfNeeded(now: Date) {
+  const apiKey = process.env.WORK24_RECRUIT_API_KEY;
+  if (!apiKey) return;
+
+  if (now.getTime() - lastWork24Refresh < refreshInterval) return;
+
+  const payload = await fetchWork24Jobs(apiKey, { display: 100 });
+  const collectedAt = now.toISOString();
+  const rawDirectory = resolve(dataRoot, 'raw/work24');
+  mkdirSync(rawDirectory, { recursive: true });
+  writeFileSync(
+    resolve(rawDirectory, `${collectedAt.replace(/[:.]/g, '-')}.json`),
+    `${JSON.stringify(payload, null, 2)}\n`,
+    'utf8',
+  );
+  runJobPipeline({ source: 'work24', payload, collectedAt, databasePath });
+  lastWork24Refresh = now.getTime();
 }
 
 async function enrichMatchedPostings(
@@ -149,16 +172,18 @@ export async function searchTryCompanies(
   let postings = readPostings();
   const alioPostings = postings.filter((posting) => posting.source === 'alio');
   await refreshAlioIfNeeded(alioPostings, now);
-  let joobleError: unknown;
-  try {
-    await refreshJoobleIfNeeded(request, now);
-  } catch (error) {
-    joobleError = error;
-  }
+  const refreshResults = await Promise.allSettled([
+    refreshJoobleIfNeeded(request, now),
+    refreshWork24IfNeeded(now),
+  ]);
+  const rejectedRefresh = refreshResults.find(
+    (result): result is PromiseRejectedResult => result.status === 'rejected',
+  );
+  const externalError: unknown = rejectedRefresh?.reason;
   postings = readPostings();
 
   if (!postings.length) {
-    if (joobleError instanceof Error) throw joobleError;
+    if (externalError instanceof Error) throw externalError;
     throw new Error('수집된 채용공고가 없습니다. API 키와 수집 상태를 확인해주세요.');
   }
 

@@ -1,11 +1,11 @@
-import { normalizeText } from './normalize.ts';
+import { normalizeText } from './normalize.js';
 import type {
   CompanyHiringSignal,
   CompanyRoleAnalysis,
   JobRoleDetail,
   NormalizedJobPosting,
   RoleAnalysisRequest,
-} from './types.ts';
+} from './types.js';
 
 const dayInMilliseconds = 24 * 60 * 60 * 1000;
 const ignoredQueryTerms = new Set([

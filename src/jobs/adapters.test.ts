@@ -1,4 +1,9 @@
-import { adaptAlioResponse, adaptJoobleResponse, adaptSaraminResponse } from './adapters.ts';
+import {
+  adaptAlioResponse,
+  adaptJoobleResponse,
+  adaptSaraminResponse,
+  adaptWork24Response,
+} from './adapters.ts';
 
 describe('adaptJoobleResponse', () => {
   it('Jooble 검색 응답을 공통 채용공고 형식으로 변환한다', () => {
@@ -70,6 +75,43 @@ describe('adaptSaraminResponse', () => {
       active: true,
     });
     expect(posting?.skills).toContain('Salesforce');
+  });
+});
+
+describe('adaptWork24Response', () => {
+  it('고용24 공채속보 응답을 공통 채용공고 형식으로 변환한다', () => {
+    const [posting] = adaptWork24Response(
+      {
+        dhsOpenEmpInfoList: {
+          total: '1',
+          dhsOpenEmpInfo: {
+            empSeqno: '171853',
+            empWantedTitle: '백엔드 개발자 모집',
+            empBusiNm: '테스트 주식회사',
+            coClcdNm: '중견기업',
+            empWantedStdt: '20260831',
+            empWantedEndt: '20260930',
+            empWantedTypeNm: '정규직',
+            empWantedHomepgDetail: 'https://www.work24.go.kr/job/test',
+          },
+        },
+      },
+      '2026-09-01T00:00:00+09:00',
+    );
+
+    expect(posting).toMatchObject({
+      source: 'work24',
+      externalId: '171853',
+      companyName: '테스트 주식회사',
+      title: '백엔드 개발자 모집',
+      industry: '중견기업',
+      location: '',
+      employmentType: '정규직',
+      publishedAt: '2026-08-30T15:00:00.000Z',
+      expiresAt: '2026-09-29T15:00:00.000Z',
+      active: true,
+    });
+    expect(posting?.jobFamily).toBe('engineering');
   });
 });
 

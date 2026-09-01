@@ -107,6 +107,37 @@ button:focus-visible {
   align-items: center;
   gap: 30px;
 }
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.admin-shortcut {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #3f4a47;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  text-decoration: none;
+  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+}
+.admin-shortcut:hover {
+  color: #0a874f;
+  border-color: rgba(10, 135, 79, 0.45);
+  background: #f3fbf7;
+}
+.admin-shortcut:focus-visible {
+  outline: 2px solid #0a874f;
+  outline-offset: 2px;
+}
+.admin-shortcut svg {
+  width: 19px;
+  height: 19px;
+}
 .site-nav > a {
   color: #5b6479;
   text-decoration: none;
@@ -126,6 +157,10 @@ button:focus-visible {
   border-radius: 6px;
   background: var(--brand-strong);
   color: #fff;
+}
+.site-nav .header-feedback {
+  color: var(--brand-dark);
+  font-weight: 750;
 }
 .header-cta svg {
   width: 15px;
@@ -266,8 +301,30 @@ button:focus-visible {
   background: #054d49;
   transform: translateY(-1px);
 }
-.primary-button svg {
+.primary-button svg,
+.secondary-button svg {
   width: 18px;
+}
+.secondary-button {
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  color: var(--brand-strong);
+  border: 1px solid rgba(8, 179, 170, 0.36);
+  border-radius: 6px;
+  background: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 800;
+  transition: 0.2s ease;
+}
+.secondary-button:hover {
+  border-color: var(--brand-strong);
+  background: var(--indigo-soft);
+  transform: translateY(-1px);
 }
 .hero-actions > span {
   display: inline-flex;
@@ -1151,6 +1208,15 @@ button:focus-visible {
 .final-cta-action svg {
   width: 16px;
 }
+.final-cta-action .final-feedback-link {
+  color: var(--brand-strong);
+  border-color: #d4e0db;
+  background: #fffefa;
+  box-shadow: none;
+}
+.final-cta-action .final-feedback-link:hover {
+  background: var(--indigo-soft);
+}
 .final-cta-action span {
   color: #064f4b;
   font-weight: 600;
@@ -1489,6 +1555,9 @@ button:focus-visible {
     flex-direction: column;
   }
   .primary-button {
+    width: 100%;
+  }
+  .secondary-button {
     width: 100%;
   }
   .hero-benefits {
@@ -2074,5 +2143,242 @@ button:focus-visible {
   }
   .result-topbar h1 {
     font-size: 31px;
+  }
+}
+
+.experience-shell,
+.result-page {
+  background-color: #fcfdfc;
+  background-image:
+    linear-gradient(rgba(23, 23, 23, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 23, 23, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.experience-nav {
+  gap: 22px;
+}
+
+.experience-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 70px 0 96px;
+}
+
+.experience-form-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.experience-copy > p {
+  max-width: 520px;
+  margin: 25px 0 0;
+  color: #40564f;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.experience-benefits {
+  max-width: 520px;
+}
+
+.experience-form-card {
+  overflow: hidden;
+  border: 1px solid rgba(8, 179, 170, 0.34);
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+}
+
+.experience-form-toolbar {
+  color: #073f3c;
+}
+
+.experience-form-body {
+  padding: 28px;
+  background: #f4f8f6;
+}
+
+.experience-results {
+  padding-top: 70px;
+  padding-bottom: 96px;
+}
+
+.experience-results .eyebrow {
+  margin-bottom: 14px;
+}
+
+.experience-results details {
+  border-radius: 8px;
+}
+
+.experience-results details > summary {
+  border-radius: 8px 8px 0 0;
+}
+
+.result-dashboard {
+  min-height: calc(100vh - 72px);
+  padding: 70px 0 96px;
+  background: transparent;
+}
+
+.result-shell {
+  width: min(1180px, calc(100% - 40px));
+  display: block;
+  margin: 0 auto;
+}
+
+.result-content {
+  gap: 18px;
+}
+
+.result-topbar {
+  padding: 30px 34px;
+  border: 1px solid rgba(8, 179, 170, 0.3);
+  border-radius: 9px;
+  background: #fff;
+  box-shadow: 0 18px 40px rgba(8, 179, 170, 0.08);
+}
+
+.result-eyebrow {
+  margin: 18px 0 0;
+}
+
+.result-topbar h1 {
+  width: max-content;
+  max-width: 100%;
+  margin-top: 16px;
+  padding: 20px 26px 22px;
+  color: #fff;
+  border: 1px solid #079a92;
+  border-radius: 13px;
+  background: var(--brand-primary);
+  font-family: var(--promo-font);
+  font-size: clamp(30px, 3vw, 40px);
+  line-height: 1.28;
+  letter-spacing: -0.5px;
+  box-shadow: 0 14px 28px rgba(8, 179, 170, 0.16);
+}
+
+.result-topbar p {
+  max-width: 680px;
+  margin-top: 16px;
+  color: #40564f;
+  font-size: 15px;
+}
+
+.secondary-action {
+  border-radius: 6px;
+  border-color: var(--line);
+}
+
+.primary-action {
+  border-radius: 6px;
+  background: var(--brand-strong);
+}
+
+.primary-action:hover {
+  background: #054d49;
+}
+
+.kpi-grid {
+  margin-top: 6px;
+}
+
+.analysis-card,
+.kpi-card {
+  border-color: #d4e0db;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(8, 179, 170, 0.07);
+}
+
+.analysis-card {
+  background: #fffefa;
+}
+
+.kpi-card > div > span,
+.coldmail-list span,
+.result-menu button.active,
+.result-menu button:hover {
+  background: var(--brand-primary);
+}
+
+.kpi-card strong,
+.section-title-row h2,
+.analysis-card h2,
+.mini-company strong,
+.section-title-row p,
+.section-kicker {
+  color: var(--brand-dark);
+}
+
+.reason-box,
+.info-row,
+.weekly-scan-card,
+.signal-progress {
+  background: var(--indigo-soft);
+}
+
+.mail-opening {
+  border: 1px solid var(--brand-strong);
+  background: var(--brand-strong);
+}
+
+@media (max-width: 980px) {
+  .experience-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .experience-copy {
+    text-align: center;
+  }
+
+  .experience-copy .eyebrow,
+  .experience-copy .hero-message-card {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .experience-benefits {
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .experience-nav {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .experience-nav > a:not(.header-cta):not(.admin-shortcut) {
+    display: none;
+  }
+
+  .experience-hero,
+  .result-dashboard,
+  .experience-results {
+    padding-top: 44px;
+    padding-bottom: 64px;
+  }
+
+  .experience-form-body {
+    padding: 22px 18px;
+  }
+
+  .result-topbar {
+    padding: 24px 20px;
+  }
+
+  .result-topbar h1 {
+    width: 100%;
+    font-size: 29px;
   }
 }

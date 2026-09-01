@@ -10,12 +10,14 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  UserCog,
 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { submitColdEmailRequest } from '@/features/apply/submit-cold-email-request';
 import type {
+  ApplicantRole,
   ColdEmailRequest,
   ColdEmailRequestDraft,
   TargetCompany,
@@ -25,6 +27,107 @@ import '@/features/apply/apply-page.css';
 
 type ColdEmailRequestPageProps = {
   targetCompany?: TargetCompany;
+  applicantRole?: ApplicantRole;
+};
+
+type RoleCopy = {
+  progressLabel: string;
+  introDescription: string;
+  eyebrow: string;
+  nameLabel: string;
+  namePlaceholder: string;
+  nameRequiredError: string;
+  descriptionLabel: string;
+  descriptionPlaceholder: string;
+  descriptionHelper: string;
+  descriptionRequiredError: string;
+  descriptionMinLengthError: string;
+  descriptionMaxLengthError: string;
+  descriptionCountLabel: string;
+  additionalRequestPlaceholder: string;
+  processItems: [string, string, string];
+  processDescription: string;
+};
+
+const roleCopy: Record<ApplicantRole, RoleCopy> = {
+  sales: {
+    progressLabel: '제품 정보',
+    introDescription:
+      '확인된 채용 변화와 조직 확대 신호에 자사 제품 정보를 더해, 영업 검토에 활용할 수 있는 맞춤 콜드메일 제작을 신청합니다.',
+    eyebrow: 'YOUR PRODUCT',
+    nameLabel: '판매하려는 제품 또는 서비스',
+    namePlaceholder: '예: AI 세일즈 코파일럿',
+    nameRequiredError: '제품 또는 서비스명을 입력해주세요.',
+    descriptionLabel: '제품을 간단히 설명해주세요',
+    descriptionPlaceholder:
+      'B2B 영업팀이 잠재 고객을 조사하고 기업별 맞춤 영업 메시지를 작성하는 시간을 줄여주는 AI 기반 세일즈 자동화 서비스입니다.',
+    descriptionHelper: '어떤 고객의 어떤 문제를 해결하는 제품인지 알려주세요.',
+    descriptionRequiredError: '제품 설명을 입력해주세요.',
+    descriptionMinLengthError: '제품 설명을 30자 이상 작성해주세요.',
+    descriptionMaxLengthError: '제품 설명은 500자 이내로 작성해주세요.',
+    descriptionCountLabel: '제품 설명',
+    additionalRequestPlaceholder:
+      '예: 너무 영업적인 표현은 피해주세요. 첫 메일은 짧게 작성해주세요.',
+    processItems: [
+      '타깃 기업의 최근 채용 변화',
+      '기업의 확장 신호',
+      '입력한 제품 / 서비스 설명',
+    ],
+    processDescription:
+      '위 정보를 바탕으로 기업에 맞는 영업 포인트와 콜드메일 내용을 구성합니다.',
+  },
+  recruiter: {
+    progressLabel: '인재 정보',
+    introDescription:
+      '확인된 채용 변화와 인재 수요에 제안할 직무와 인재 정보를 더해, 채용 제안에 활용할 수 있는 맞춤 콜드메일 제작을 신청합니다.',
+    eyebrow: 'YOUR TALENT',
+    nameLabel: '제안하려는 직무 또는 인재 분야',
+    namePlaceholder: '예: 시니어 백엔드 개발자',
+    nameRequiredError: '제안하려는 직무 또는 인재 분야를 입력해주세요.',
+    descriptionLabel: '제안할 인재와 강점을 설명해주세요',
+    descriptionPlaceholder:
+      'B2B SaaS 경험과 대규모 트래픽 처리 역량을 갖춘 7년 차 백엔드 개발자를 채용 중인 기업에 제안하려고 합니다.',
+    descriptionHelper: '어떤 인재를 어떤 포지션에 제안하려는지 알려주세요.',
+    descriptionRequiredError: '인재와 제안 강점을 입력해주세요.',
+    descriptionMinLengthError: '인재와 제안 강점을 30자 이상 작성해주세요.',
+    descriptionMaxLengthError: '인재와 제안 강점은 500자 이내로 작성해주세요.',
+    descriptionCountLabel: '인재와 제안 강점',
+    additionalRequestPlaceholder:
+      '예: 후보자의 현재 회사명은 밝히지 말고, 실무 강점을 중심으로 작성해주세요.',
+    processItems: [
+      '타깃 기업의 최근 채용 변화',
+      '직무별 채용 수요와 인재 신호',
+      '입력한 직무 / 인재 정보',
+    ],
+    processDescription:
+      '위 정보를 바탕으로 기업의 채용 맥락에 맞는 후보 제안 포인트와 콜드메일 내용을 구성합니다.',
+  },
+  investor: {
+    progressLabel: '투자 관점',
+    introDescription:
+      '확인된 채용 변화와 성장 신호에 투자 관심 분야와 검토 관점을 더해, 기업 접촉에 활용할 수 있는 맞춤 콜드메일 제작을 신청합니다.',
+    eyebrow: 'YOUR INVESTMENT VIEW',
+    nameLabel: '관심 있는 산업 또는 투자 테마',
+    namePlaceholder: '예: B2B SaaS, AI 인프라',
+    nameRequiredError: '관심 있는 산업 또는 투자 테마를 입력해주세요.',
+    descriptionLabel: '투자 관점과 관심 조건을 설명해주세요',
+    descriptionPlaceholder:
+      '시리즈 A 전후의 B2B SaaS 기업 중 반복 매출이 성장하고 해외 시장 확장을 준비하는 팀을 검토하고 있습니다.',
+    descriptionHelper: '어떤 기업을 어떤 투자 관점에서 검토하는지 알려주세요.',
+    descriptionRequiredError: '투자 관점과 관심 조건을 입력해주세요.',
+    descriptionMinLengthError: '투자 관점과 관심 조건을 30자 이상 작성해주세요.',
+    descriptionMaxLengthError: '투자 관점과 관심 조건은 500자 이내로 작성해주세요.',
+    descriptionCountLabel: '투자 관점과 관심 조건',
+    additionalRequestPlaceholder:
+      '예: 투자 제안보다 시장과 성장 전략에 대한 대화를 요청하는 톤으로 작성해주세요.',
+    processItems: [
+      '타깃 기업의 최근 채용 변화',
+      '기업의 성장과 확장 신호',
+      '입력한 투자 테마 / 검토 관점',
+    ],
+    processDescription:
+      '위 정보를 바탕으로 기업에 맞는 투자 검토 포인트와 콜드메일 내용을 구성합니다.',
+  },
 };
 
 type FormValues = {
@@ -52,7 +155,7 @@ const initialValues: FormValues = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const fieldClassName = 'apply-field';
 
-function ApplyHeader() {
+function ApplyHeader({ copy }: { copy: RoleCopy }) {
   return (
     <>
       <header className="apply-site-header">
@@ -63,16 +166,26 @@ function ApplyHeader() {
             </span>
             <span>세일즈 시그널</span>
           </a>
-          <span className="apply-header-status">
-            <ShieldCheck aria-hidden="true" />
-            신청 정보 보호
-          </span>
+          <div className="apply-header-actions">
+            <span className="apply-header-status">
+              <ShieldCheck aria-hidden="true" />
+              신청 정보 보호
+            </span>
+            <a
+              className="apply-admin-shortcut"
+              href="/admin/cold-email-requests"
+              aria-label="관리자 페이지"
+              title="관리자 페이지"
+            >
+              <UserCog aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </header>
       <div className="apply-progress" aria-label="서비스 진행 단계: 4단계 중 4단계">
         <div className="apply-container apply-progress-inner">
           <div>
-            <span>제품 정보</span>
+            <span>{copy.progressLabel}</span>
             <span>기업 탐색</span>
             <span>상세 분석</span>
             <strong>콜드메일 신청</strong>
@@ -84,7 +197,7 @@ function ApplyHeader() {
   );
 }
 
-function validateForm(values: FormValues): FormErrors {
+function validateForm(values: FormValues, copy: RoleCopy): FormErrors {
   const errors: FormErrors = {};
   const applicantEmail = values.applicantEmail.trim();
   const descriptionLength = values.productDescription.trim().length;
@@ -96,14 +209,14 @@ function validateForm(values: FormValues): FormErrors {
   }
 
   if (!values.applicantCompany.trim()) errors.applicantCompany = '회사명을 입력해주세요.';
-  if (!values.productName.trim()) errors.productName = '제품 또는 서비스명을 입력해주세요.';
+  if (!values.productName.trim()) errors.productName = copy.nameRequiredError;
 
   if (descriptionLength === 0) {
-    errors.productDescription = '제품 설명을 입력해주세요.';
+    errors.productDescription = copy.descriptionRequiredError;
   } else if (descriptionLength < 30) {
-    errors.productDescription = '제품 설명을 30자 이상 작성해주세요.';
+    errors.productDescription = copy.descriptionMinLengthError;
   } else if (descriptionLength > 500) {
-    errors.productDescription = '제품 설명은 500자 이내로 작성해주세요.';
+    errors.productDescription = copy.descriptionMaxLengthError;
   }
 
   if (!values.privacyAgreed) errors.privacyAgreed = '정보 처리에 동의해주세요.';
@@ -202,10 +315,10 @@ function TargetCompanySummary({ targetCompany }: { targetCompany?: TargetCompany
   );
 }
 
-function RequestSuccessState({ request }: { request: ColdEmailRequest }) {
+function RequestSuccessState({ request, copy }: { request: ColdEmailRequest; copy: RoleCopy }) {
   return (
     <div className="apply-shell">
-      <ApplyHeader />
+      <ApplyHeader copy={copy} />
       <main className="apply-success-page">
         <section className="apply-success-card">
           <div className="apply-success-icon">
@@ -220,20 +333,21 @@ function RequestSuccessState({ request }: { request: ColdEmailRequest }) {
           <p className="apply-success-email">
             <strong>{request.applicantEmail}</strong>은 신청 결과 전달을 위해 사용됩니다.
           </p>
-          {import.meta.env.DEV ? (
-            <p className="apply-mock-note">개발용 Mock submit으로 접수된 상태입니다.</p>
-          ) : null}
         </section>
       </main>
     </div>
   );
 }
 
-export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProps) {
+export function ColdEmailRequestPage({
+  targetCompany,
+  applicantRole = 'sales',
+}: ColdEmailRequestPageProps) {
   const [values, setValues] = useState<FormValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<SubmissionStatus>('idle');
   const [submittedRequest, setSubmittedRequest] = useState<ColdEmailRequest | null>(null);
+  const copy = roleCopy[applicantRole];
 
   const isSubmitting = status === 'submitting';
 
@@ -248,7 +362,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
     if (isSubmitting || !targetCompany) return;
 
     setStatus('validating');
-    const nextErrors = validateForm(values);
+    const nextErrors = validateForm(values, copy);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
@@ -257,6 +371,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
     }
 
     const request: ColdEmailRequestDraft = {
+      applicantRole,
       applicantEmail: values.applicantEmail.trim(),
       applicantCompany: values.applicantCompany.trim(),
       productName: values.productName.trim(),
@@ -278,12 +393,12 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
   }
 
   if (status === 'success' && submittedRequest) {
-    return <RequestSuccessState request={submittedRequest} />;
+    return <RequestSuccessState request={submittedRequest} copy={copy} />;
   }
 
   return (
     <div className="apply-shell">
-      <ApplyHeader />
+      <ApplyHeader copy={copy} />
       <main className="apply-page">
         <div className="apply-container apply-content">
           <header className="apply-intro">
@@ -302,8 +417,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
               )}
             </h1>
             <p>
-              확인된 채용 변화와 조직 확대 신호에 자사 제품 정보를 더해, 영업 검토에 활용할 수 있는
-              맞춤 콜드메일 제작을 신청합니다.
+              {copy.introDescription}
             </p>
           </header>
 
@@ -316,7 +430,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
           >
             <div className="apply-form-heading">
               <div>
-                <span>YOUR PRODUCT</span>
+                <span>{copy.eyebrow}</span>
                 <h2>신청 정보</h2>
               </div>
               <p>필수 정보만 간단히 입력해주세요.</p>
@@ -367,7 +481,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold" htmlFor="product-name">
-                  판매하려는 제품 또는 서비스 <span className="text-primary">*</span>
+                  {copy.nameLabel} <span className="text-primary">*</span>
                 </label>
                 <input
                   aria-describedby={errors.productName ? 'product-name-error' : undefined}
@@ -375,7 +489,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
                   className={fieldClassName}
                   id="product-name"
                   onChange={(event) => updateTextField('productName', event.target.value)}
-                  placeholder="예: AI 세일즈 코파일럿"
+                  placeholder={copy.namePlaceholder}
                   value={values.productName}
                 />
                 <FieldError id="product-name-error" message={errors.productName} />
@@ -383,7 +497,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
 
               <div className="space-y-2 sm:col-span-2">
                 <label className="text-sm font-semibold" htmlFor="product-description">
-                  제품을 간단히 설명해주세요 <span className="text-primary">*</span>
+                  {copy.descriptionLabel} <span className="text-primary">*</span>
                 </label>
                 <textarea
                   aria-describedby={
@@ -396,16 +510,16 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
                   id="product-description"
                   maxLength={500}
                   onChange={(event) => updateTextField('productDescription', event.target.value)}
-                  placeholder="B2B 영업팀이 잠재 고객을 조사하고 기업별 맞춤 영업 메시지를 작성하는 시간을 줄여주는 AI 기반 세일즈 자동화 서비스입니다."
+                  placeholder={copy.descriptionPlaceholder}
                   value={values.productDescription}
                 />
                 <div
                   className="flex items-start justify-between gap-3 text-xs text-muted-foreground"
                   id="product-description-help"
                 >
-                  <span>어떤 고객의 어떤 문제를 해결하는 제품인지 알려주세요.</span>
+                  <span>{copy.descriptionHelper}</span>
                   <span
-                    aria-label={`제품 설명 ${values.productDescription.length}자 입력`}
+                    aria-label={`${copy.descriptionCountLabel} ${values.productDescription.length}자 입력`}
                     className="shrink-0"
                   >
                     {values.productDescription.length} / 500
@@ -422,7 +536,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
                   className={cn(fieldClassName, 'min-h-24 resize-y')}
                   id="additional-request"
                   onChange={(event) => updateTextField('additionalRequest', event.target.value)}
-                  placeholder="예: 너무 영업적인 표현은 피해주세요. 첫 메일은 짧게 작성해주세요."
+                  placeholder={copy.additionalRequestPlaceholder}
                   value={values.additionalRequest}
                 />
               </div>
@@ -433,11 +547,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
                 어떻게 만들어지나요?
               </h3>
               <ul className="mt-3 grid gap-2 text-sm text-muted-foreground sm:grid-cols-3">
-                {[
-                  '타깃 기업의 최근 채용 변화',
-                  '기업의 확장 신호',
-                  '입력한 제품 / 서비스 설명',
-                ].map((item) => (
+                {copy.processItems.map((item) => (
                   <li className="flex items-start gap-2" key={item}>
                     <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                     {item}
@@ -445,7 +555,7 @@ export function ColdEmailRequestPage({ targetCompany }: ColdEmailRequestPageProp
                 ))}
               </ul>
               <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                위 정보를 바탕으로 기업에 맞는 영업 포인트와 콜드메일 내용을 구성합니다.
+                {copy.processDescription}
               </p>
             </section>
 

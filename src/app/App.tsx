@@ -9,11 +9,13 @@ import {
   CircleHelp,
   FileSearch,
   Menu,
+  MessageSquareText,
   Radar,
   ShieldCheck,
   Sparkles,
   Target,
   TrendingUp,
+  UserCog,
   Users,
   X,
 } from 'lucide-react';
@@ -25,8 +27,11 @@ import { TryPage } from '@/pages/TryPage';
 import { ResultDetailPage } from '@/pages/ResultDetailPage';
 
 import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
+import { ColdEmailRequestsAdminPage } from '@/features/apply/ColdEmailRequestsAdminPage';
 import { mockTargetCompany } from '@/features/apply/mock-target-company';
-import type { TargetCompany } from '@/features/apply/types';
+import type { ApplicantRole, TargetCompany } from '@/features/apply/types';
+import { FeedbackPage } from '@/features/feedback/FeedbackPage';
+import { HomepageFeedbackAdminPage } from '@/features/feedback/HomepageFeedbackAdminPage';
 
 declare global {
   interface Window {
@@ -225,31 +230,55 @@ function LandingPage() {
     if (placement === 'footer') track('final_cta_clicked');
   };
 
+  const trackFeedback = (placement: 'header' | 'hero' | 'footer') => {
+    track('homepage_feedback_clicked', { placement });
+  };
+
   return (
     <div id="top">
       <header className="site-header">
         <div className="container header-inner">
           <Logo />
-          <nav className={menuOpen ? 'site-nav open' : 'site-nav'} aria-label="주요 메뉴">
-            <a href="#service" onClick={() => setMenuOpen(false)}>
-              서비스 소개
+          <div className="header-actions">
+            <nav className={menuOpen ? 'site-nav open' : 'site-nav'} aria-label="주요 메뉴">
+              <a href="#service" onClick={() => setMenuOpen(false)}>
+                서비스 소개
+              </a>
+              <a href="#how" onClick={() => setMenuOpen(false)}>
+                이용 방법
+              </a>
+              <a
+                className="header-feedback"
+                href="/feedback"
+                onClick={() => {
+                  setMenuOpen(false);
+                  trackFeedback('header');
+                }}
+              >
+                피드백
+              </a>
+              <a className="header-cta" href="/experience" onClick={() => trackTrial('header')}>
+                무료 체험 <ArrowRight />
+              </a>
+            </nav>
+            <a
+              className="admin-shortcut"
+              href="/admin/homepage-feedback"
+              aria-label="관리자 페이지"
+              title="관리자 페이지"
+            >
+              <UserCog aria-hidden="true" />
             </a>
-            <a href="#how" onClick={() => setMenuOpen(false)}>
-              이용 방법
-            </a>
-            <a className="header-cta" href="/experience" onClick={() => trackTrial('header')}>
-              무료 체험 시작하기 <ArrowRight />
-            </a>
-          </nav>
-          <button
-            className="menu-toggle"
-            type="button"
-            aria-label={menuOpen ? '메뉴 닫기' : '메뉴 열기'}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((open) => !open)}
-          >
-            {menuOpen ? <X /> : <Menu />}
-          </button>
+            <button
+              className="menu-toggle"
+              type="button"
+              aria-label={menuOpen ? '메뉴 닫기' : '메뉴 열기'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              {menuOpen ? <X /> : <Menu />}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -276,6 +305,14 @@ function LandingPage() {
               <div className="hero-actions">
                 <a className="primary-button" href="/experience" onClick={() => trackTrial('hero')}>
                   무료 체험 시작하기 <ArrowRight />
+                </a>
+                <a
+                  className="secondary-button"
+                  href="/feedback"
+                  onClick={() => trackFeedback('hero')}
+                >
+                  <MessageSquareText aria-hidden="true" />
+                  피드백 남기기
                 </a>
                 <span>
                   <CheckCircle2 /> 약 1분 소요 · 추천 기업 3곳 무료 확인
@@ -504,6 +541,13 @@ function LandingPage() {
               <a href="/experience" onClick={() => trackTrial('footer')}>
                 무료 체험 시작하기 <ArrowRight />
               </a>
+              <a
+                className="final-feedback-link"
+                href="/feedback"
+                onClick={() => trackFeedback('footer')}
+              >
+                홈페이지 피드백 남기기 <MessageSquareText aria-hidden="true" />
+              </a>
               <span>회원가입 없음 · 결제정보 없음 · 약 1분 소요</span>
             </div>
           </div>
@@ -625,11 +669,15 @@ function LandingPage() {
 
 function ApplyPageRoute() {
   const location = useLocation();
-  const targetCompany = (location.state as { targetCompany?: TargetCompany } | null)?.targetCompany;
+  const applyState = location.state as {
+    targetCompany?: TargetCompany;
+    applicantRole?: ApplicantRole;
+  } | null;
 
   return (
     <ColdEmailRequestPage
-      targetCompany={targetCompany ?? (import.meta.env.DEV ? mockTargetCompany : undefined)}
+      applicantRole={applyState?.applicantRole}
+      targetCompany={applyState?.targetCompany ?? (import.meta.env.DEV ? mockTargetCompany : undefined)}
     />
   );
 }
@@ -643,6 +691,9 @@ const router = createBrowserRouter([
   { path: '/results', Component: ResultDetailPage },
   { path: '/result/:companyId', Component: ResultDetailPage },
   { path: '/apply', Component: ApplyPageRoute },
+  { path: '/feedback', Component: FeedbackPage },
+  { path: '/admin/homepage-feedback', Component: HomepageFeedbackAdminPage },
+  { path: '/admin/cold-email-requests', Component: ColdEmailRequestsAdminPage },
   { path: '*', Component: LandingPage },
 ]);
 

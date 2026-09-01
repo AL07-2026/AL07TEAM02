@@ -38,6 +38,15 @@ describe('ColdEmailRequestPage', () => {
     );
   });
 
+  it('헤더에서 관리자 페이지로 이동할 수 있다', () => {
+    render(<ColdEmailRequestPage targetCompany={{ name: '테스트 기업' }} />);
+
+    expect(screen.getByRole('link', { name: '관리자 페이지' })).toHaveAttribute(
+      'href',
+      '/admin/cold-email-requests',
+    );
+  });
+
   it('기업 정보가 없으면 안내하고 신청을 비활성화한다', () => {
     render(<ColdEmailRequestPage />);
 
@@ -55,6 +64,28 @@ describe('ColdEmailRequestPage', () => {
     expect(screen.getByText('제품 또는 서비스명을 입력해주세요.')).toBeInTheDocument();
     expect(screen.getByText('제품 설명을 입력해주세요.')).toBeInTheDocument();
     expect(screen.getByText('정보 처리에 동의해주세요.')).toBeInTheDocument();
+  });
+
+  it('헤드헌터에게 인재 제안에 맞는 문구를 보여준다', () => {
+    render(
+      <ColdEmailRequestPage applicantRole="recruiter" targetCompany={{ name: '테스트 기업' }} />,
+    );
+
+    expect(screen.getByLabelText(/제안하려는 직무 또는 인재 분야/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/제안할 인재와 강점을 설명해주세요/)).toBeInTheDocument();
+    expect(screen.getByText('입력한 직무 / 인재 정보')).toBeInTheDocument();
+    expect(screen.queryByText('제품을 간단히 설명해주세요')).not.toBeInTheDocument();
+  });
+
+  it('투자심사역에게 투자 검토에 맞는 문구를 보여준다', () => {
+    render(
+      <ColdEmailRequestPage applicantRole="investor" targetCompany={{ name: '테스트 기업' }} />,
+    );
+
+    expect(screen.getByLabelText(/관심 있는 산업 또는 투자 테마/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/투자 관점과 관심 조건을 설명해주세요/)).toBeInTheDocument();
+    expect(screen.getByText('입력한 투자 테마 / 검토 관점')).toBeInTheDocument();
+    expect(screen.queryByText('제품을 간단히 설명해주세요')).not.toBeInTheDocument();
   });
 
   it('유효한 신청을 submit 함수에 전달하고 성공 상태를 표시한다', async () => {

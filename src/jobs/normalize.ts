@@ -1,4 +1,4 @@
-import type { JobFamily, NormalizedJobInput, NormalizedJobPosting, Seniority } from './types.ts';
+import type { JobFamily, NormalizedJobInput, NormalizedJobPosting, Seniority } from './types.js';
 
 const jobFamilyTerms: Array<[JobFamily, string[]]> = [
   ['sales', ['영업', '세일즈', 'sales', 'account executive', '사업개발', '파트너십']],

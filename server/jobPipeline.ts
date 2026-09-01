@@ -3,15 +3,16 @@ import {
   adaptJoobleResponse,
   adaptNormalizedRecords,
   adaptSaraminResponse,
-} from '../src/jobs/adapters.ts';
-import { analyzeCompanies } from '../src/jobs/analysis.ts';
+  adaptWork24Response,
+} from '../src/jobs/adapters.js';
+import { analyzeCompanies } from '../src/jobs/analysis.js';
 import type {
   JobSource,
   NormalizedJobInput,
   NormalizedJobPosting,
   RoleAnalysisRequest,
-} from '../src/jobs/types.ts';
-import { JobStore, type ImportSummary } from './jobStore.ts';
+} from '../src/jobs/types.js';
+import { JobStore, type ImportSummary } from './jobStore.js';
 
 type PipelineInput = {
   source: JobSource;
@@ -48,6 +49,7 @@ export function adaptJobPayload(
   if (source === 'saramin') return adaptSaraminResponse(payload, collectedAt);
   if (source === 'alio') return adaptAlioResponse(payload, collectedAt);
   if (source === 'jooble') return adaptJoobleResponse(payload, collectedAt);
+  if (source === 'work24') return adaptWork24Response(payload, collectedAt);
   return adaptNormalizedRecords(getArray(payload) as NormalizedJobInput[]);
 }
 

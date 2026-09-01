@@ -3,13 +3,23 @@ import type { ColdEmailRequest, ColdEmailRequestDraft } from '@/features/apply/t
 export async function submitColdEmailRequest(
   request: ColdEmailRequestDraft,
 ): Promise<ColdEmailRequest> {
-  if (!import.meta.env.DEV) {
-    throw new Error('Backend endpoint 연결이 필요합니다.');
+  const response = await fetch('/api/cold-email-requests', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    let message = '신청 처리에 실패했습니다.';
+    try {
+      const payload = (await response.json()) as { error?: string };
+      if (payload.error) message = payload.error;
+    } catch {
+      // Keep the generic error when the server does not return JSON.
+    }
+
+    throw new Error(message);
   }
 
-  // 개발용 mock에는 서버가 없으므로 접수 시각을 클라이언트에서 생성한다.
-  return Promise.resolve({
-    ...request,
-    submittedAt: new Date().toISOString(),
-  });
+  return (await response.json()) as ColdEmailRequest;
 }

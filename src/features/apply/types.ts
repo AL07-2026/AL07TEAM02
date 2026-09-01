@@ -1,3 +1,5 @@
+export type ApplicantRole = 'sales' | 'recruiter' | 'investor';
+
 export type TargetCompany = {
   id?: string;
   name: string;
@@ -8,6 +10,7 @@ export type TargetCompany = {
 };
 
 export type ColdEmailRequestDraft = {
+  applicantRole: ApplicantRole;
   applicantEmail: string;
   applicantCompany: string;
   productName: string;
@@ -18,5 +21,6 @@ export type ColdEmailRequestDraft = {
 };
 
 export type ColdEmailRequest = ColdEmailRequestDraft & {
+  id?: string;
   submittedAt: string;
 };

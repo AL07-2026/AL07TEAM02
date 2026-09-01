@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   Building2,
-  ChartNoAxesCombined,
   Check,
   ChevronDown,
   ExternalLink,
@@ -9,8 +8,9 @@ import {
   Search,
   Target,
   TrendingUp,
+  UserCog,
   UserRoundSearch,
-  Zap,
+  Radar,
 } from 'lucide-react';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
@@ -28,22 +28,10 @@ const userTypes: Array<{
   icon: typeof Target;
 }> = [
   {
-    value: 'sales',
-    label: 'B2B 영업',
-    description: '구매 가능성이 높은 기업을 찾고 싶어요.',
-    icon: Target,
-  },
-  {
     value: 'recruiter',
     label: '헤드헌터',
     description: '채용 수요가 커지는 기업을 찾고 싶어요.',
     icon: UserRoundSearch,
-  },
-  {
-    value: 'investor',
-    label: '투자심사역',
-    description: '성장 신호가 보이는 기업을 찾고 싶어요.',
-    icon: ChartNoAxesCombined,
   },
 ];
 
@@ -401,30 +389,39 @@ export function TryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#dff5f0] text-[#101918]">
-      <header className="border-b border-[#cfe0dc] bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-8">
+    <div className="experience-shell min-h-screen text-[#101918]">
+      <header className="site-header">
+        <div className="container header-inner">
           <Link
-            className="group inline-flex items-center gap-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-4"
+            className="brand"
             to="/"
+            aria-label="세일즈 시그널 홈"
           >
-            <span className="grid size-10 place-items-center rounded-xl bg-[#009d7e] text-white transition-transform group-hover:-rotate-3">
-              <Zap aria-hidden="true" className="size-5" />
+            <span className="brand-symbol" aria-hidden="true">
+              <Radar />
             </span>
-            <span className="text-lg font-black tracking-[-0.03em]">Signal Radar</span>
+            <span>세일즈 시그널</span>
           </Link>
           <nav
             aria-label="주요 메뉴"
-            className="flex items-center gap-5 text-sm font-semibold text-[#586864] sm:gap-8"
+            className="site-nav experience-nav"
           >
             <Link className="hidden transition hover:text-[#009d7e] sm:block" to="/">
-              서비스
+              서비스 소개
             </Link>
-            <Link aria-current="page" className="text-[#009d7e]" to="/try">
-              체험하기
+            <Link className="hidden transition hover:text-[#009d7e] sm:block" to="/#how">
+              이용 방법
             </Link>
-            <Link className="hidden transition hover:text-[#009d7e] sm:block" to="/result/flowdesk">
-              결과 분석
+            <Link aria-current="page" className="header-cta" to="/experience">
+              무료 체험 <ArrowRight />
+            </Link>
+            <Link
+              aria-label="관리자 페이지"
+              className="admin-shortcut"
+              title="관리자 페이지"
+              to="/admin/cold-email-requests"
+            >
+              <UserCog aria-hidden="true" />
             </Link>
           </nav>
         </div>
@@ -432,14 +429,53 @@ export function TryPage() {
 
       <main>
         {!isResultsPage ? (
-        <section className="relative overflow-hidden border-b border-[#cfe0dc] px-5 py-8 sm:px-8 sm:py-12">
-          <div className="mx-auto max-w-4xl">
+        <section className="experience-hero">
+          <div className="container experience-form-grid">
+            <div className="experience-copy">
+              <span className="eyebrow">
+                <Search /> 무료 체험 조건 입력
+              </span>
+              <h1 className="hero-message-card">
+                <span>찾고 싶은 기업을</span>
+                <em>채용 신호 기준으로</em>
+                <span className="headline-last-line">
+                  바로 좁혀보세요 <ArrowRight aria-hidden="true" />
+                </span>
+              </h1>
+              <p>
+                역할과 목적만 입력하면 공개 채용공고를 분석해 우선 검토할 기업을 추천합니다.
+              </p>
+              <div className="hero-benefits experience-benefits">
+                <div>
+                  <Target />
+                  <span>
+                    <strong>역할 맞춤</strong>영업·채용·투자 관점
+                  </span>
+                </div>
+                <div>
+                  <TrendingUp />
+                  <span>
+                    <strong>근거 기반</strong>채용 변화 분석
+                  </span>
+                </div>
+              </div>
+            </div>
             <form
               aria-label="추천 기업 조건"
-              className="relative rounded-2xl border border-[#c8dcd7] bg-white p-5 shadow-[0_20px_55px_-35px_rgba(20,80,68,0.45)] sm:p-8"
+              className="experience-form-card"
               noValidate
               onSubmit={handleSubmit}
             >
+              <div className="demo-toolbar experience-form-toolbar">
+                <div className="window-dots">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <strong>추천 조건</strong>
+                <span className="demo-label">예시 가능</span>
+              </div>
+              <div className="experience-form-body">
               <div>
                 <h1 className="text-2xl font-black tracking-[-0.035em] text-[#152139] sm:text-[1.75rem]">
                   어떤 기업을 찾고 있나요?
@@ -456,7 +492,7 @@ export function TryPage() {
                 <legend className="text-sm font-bold text-[#18243b]">
                   먼저, 나의 역할을 선택해주세요 <span className="text-[#df532d]">*</span>
                 </legend>
-                <div className="mt-3 grid gap-2.5 sm:grid-cols-3">
+                <div className="mt-3 grid gap-2.5">
                   {userTypes.map(({ value, label, description, icon: Icon }) => (
                     <label
                       className={cn(
@@ -600,15 +636,19 @@ export function TryPage() {
               <p className="mt-3 text-center text-xs leading-5 text-[#7a869b]">
                 입력한 정보는 저장되지 않으며, 체험 결과 생성에만 사용됩니다.
               </p>
+              </div>
             </form>
           </div>
         </section>
         ) : null}
 
         {isResultsPage && submittedForm ? (
-          <section aria-live="polite" className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+          <section aria-live="polite" className="experience-results container">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
+                <span className="eyebrow">
+                  <TrendingUp /> 채용 데이터 분석 결과
+                </span>
                 <h2 className="text-3xl font-black tracking-[-0.045em] text-[#0b1f1a]">
                   지금 확인할 기업 {recommendations.length}곳
                 </h2>

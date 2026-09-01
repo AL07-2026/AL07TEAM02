@@ -1,4 +1,4 @@
-export type JobSource = 'alio' | 'jooble' | 'saramin' | 'normalized';
+export type JobSource = 'alio' | 'jooble' | 'saramin' | 'work24' | 'normalized';
 
 export type JobFamily =
   | 'sales'
