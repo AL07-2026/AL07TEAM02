@@ -23,6 +23,7 @@ const match = {
   evidenceUrls: ['https://example.com/job/1'],
   evidence: [
     {
+      source: 'work24' as const,
       title: '간호사 채용 공고',
       url: 'https://example.com/job/1',
       publishedAt: '2026-08-10T00:00:00.000Z',
@@ -48,6 +49,7 @@ function mockSearchResponse(matches = [match]) {
         collectedAt: '2026-08-12T00:00:00.000Z',
         matches,
         postingCount: 10,
+        sourceCounts: { jooble: 6, work24: 4 },
       }),
       { status: 200, headers: { 'content-type': 'application/json' } },
     ),
@@ -87,6 +89,8 @@ describe('TryPage', () => {
       await screen.findByRole('heading', { name: '지금 확인할 기업 1곳' }),
     ).toBeInTheDocument();
     expect(screen.getByText('추천 1순위')).toBeInTheDocument();
+    expect(screen.getByText('고용24 4건')).toBeInTheDocument();
+    expect(screen.getByText('Jooble 6건')).toBeInTheDocument();
     expect(screen.getByText('간호사 채용 공고')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '국립중앙의료원 상세 분석 보기' })).toHaveAttribute(
       'href',

@@ -5,12 +5,12 @@ import {
   CircleCheck,
   LoaderCircle,
   MessageSquareText,
-  Radar,
   Send,
 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { ChokBrand } from '@/components/ChokBrand';
 import { submitHomepageFeedback } from '@/features/feedback/submit-homepage-feedback';
 import type { HomepageFeedback, HomepageFeedbackDraft } from '@/features/feedback/types';
 import { cn } from '@/lib/utils';
@@ -69,12 +69,7 @@ function FeedbackHeader() {
   return (
     <header className="feedback-header">
       <div className="feedback-container feedback-header-inner">
-        <a className="feedback-brand" href="/" aria-label="세일즈 시그널 홈">
-          <span aria-hidden="true">
-            <Radar />
-          </span>
-          세일즈 시그널
-        </a>
+        <ChokBrand />
         <a className="feedback-back-link" href="/">
           <ArrowLeft aria-hidden="true" />
           메인으로

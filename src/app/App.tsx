@@ -25,6 +25,7 @@ import { RouterProvider } from 'react-router/dom';
 
 import { TryPage } from '@/pages/TryPage';
 import { ResultDetailPage } from '@/pages/ResultDetailPage';
+import { ChokBrand } from '@/components/ChokBrand';
 
 import { ColdEmailRequestPage } from '@/features/apply/ColdEmailRequestPage';
 import { ColdEmailRequestsAdminPage } from '@/features/apply/ColdEmailRequestsAdminPage';
@@ -32,7 +33,6 @@ import { mockTargetCompany } from '@/features/apply/mock-target-company';
 import type { ApplicantRole, TargetCompany } from '@/features/apply/types';
 import { FeedbackPage } from '@/features/feedback/FeedbackPage';
 import { HomepageFeedbackAdminPage } from '@/features/feedback/HomepageFeedbackAdminPage';
-import chokLogo from '@/assets/chok-logo.png';
 
 declare global {
   interface Window {
@@ -107,13 +107,7 @@ function track(name: string, properties: Record<string, unknown> = {}) {
 }
 
 function Logo() {
-  return (
-    <a className="brand" href="#top" aria-label="촉 홈">
-      <span className="brand-logo-frame">
-        <img className="brand-logo" src={chokLogo} alt="촉 CHOK" />
-      </span>
-    </a>
-  );
+  return <ChokBrand href="#top" />;
 }
 
 function MetricHelp({ description }: { description: string }) {

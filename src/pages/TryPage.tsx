@@ -10,13 +10,19 @@ import {
   TrendingUp,
   UserCog,
   UserRoundSearch,
-  Radar,
 } from 'lucide-react';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
 import { Button } from '@/components/ui/button';
-import type { CompanyRoleAnalysis, TrySearchRequest, TrySearchResponse } from '@/jobs/types';
+import { ChokBrand } from '@/components/ChokBrand';
+import { storeCompanyAnalysis } from '@/jobs/analysisSession';
+import type {
+  CompanyRoleAnalysis,
+  JobSource,
+  TrySearchRequest,
+  TrySearchResponse,
+} from '@/jobs/types';
 import { cn } from '@/lib/utils';
 
 type UserType = TrySearchRequest['role'];
@@ -64,6 +70,13 @@ const regionLabels: Record<string, string> = {
   seoul: '서울',
   gyeonggi: '경기',
   busan: '부산',
+};
+
+const sourceLabels: Partial<Record<JobSource, string>> = {
+  alio: 'ALIO',
+  jooble: 'Jooble',
+  saramin: '사람인',
+  work24: '고용24',
 };
 
 type SearchPayload = TrySearchResponse | { error?: string };
@@ -256,6 +269,9 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
                 {displayPostingTitle(evidence.title)}
               </p>
               <p className="mt-1.5 text-xs leading-5 text-[#71817d]">
+                <span className="mr-2 inline-flex rounded-full bg-[#dff3ed] px-2 py-0.5 font-bold text-[#007d65]">
+                  {sourceLabels[evidence.source] ?? evidence.source}
+                </span>
                 {formatPostingDate(evidence.publishedAt)} · {evidence.location || '지역 미기재'}
                 {roleFinding?.headcount
                   ? ` · ${displayPostingTitle(roleFinding.name)} ${roleFinding.headcount}명`
@@ -281,6 +297,7 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
         aria-label={`${displayCompany} 상세 분석 보기`}
         className="mt-6 inline-flex w-full items-center justify-between rounded-xl bg-[#0c1715] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#19302b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009d7e] focus-visible:ring-offset-2"
         state={{ analysis: match }}
+        onClick={() => storeCompanyAnalysis(match)}
         to={`/result/${encodeURIComponent(match.companyName)}`}
       >
         상세 분석 보기
@@ -299,6 +316,7 @@ export function TryPage() {
   const [submittedForm, setSubmittedForm] = useState<TrialForm | null>(null);
   const [recommendations, setRecommendations] = useState<CompanyRoleAnalysis[]>([]);
   const [postingCount, setPostingCount] = useState(0);
+  const [sourceCounts, setSourceCounts] = useState<TrySearchResponse['sourceCounts']>({});
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
   const [showErrors, setShowErrors] = useState(false);
@@ -370,12 +388,14 @@ export function TryPage() {
 
       setRecommendations(payload.matches);
       setPostingCount(payload.postingCount);
+      setSourceCounts(payload.sourceCounts);
       setSubmittedForm(searchForm);
       setShowAllResults(false);
       void navigate('/experience/results', {
         state: {
           recommendations: payload.matches,
           postingCount: payload.postingCount,
+          sourceCounts: payload.sourceCounts,
           submittedForm: searchForm,
         },
       });
@@ -392,16 +412,7 @@ export function TryPage() {
     <div className="experience-shell min-h-screen text-[#101918]">
       <header className="site-header">
         <div className="container header-inner">
-          <Link
-            className="brand"
-            to="/"
-            aria-label="세일즈 시그널 홈"
-          >
-            <span className="brand-symbol" aria-hidden="true">
-              <Radar />
-            </span>
-            <span>세일즈 시그널</span>
-          </Link>
+          <ChokBrand />
           <nav
             aria-label="주요 메뉴"
             className="site-nav experience-nav"
@@ -656,6 +667,19 @@ export function TryPage() {
                   실제 채용공고 {postingCount}건을 분석해 입력 조건과 연결되는 기업을
                   우선순위로 정리했습니다. 기업을 누르면 추천 근거와 상세 분석을 확인할 수 있습니다.
                 </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2" aria-label="분석 데이터 출처">
+                  <span className="text-xs font-bold text-[#60746f]">분석 데이터</span>
+                  {Object.entries(sourceCounts)
+                    .filter((entry): entry is [JobSource, number] => Boolean(entry[1]))
+                    .map(([source, count]) => (
+                      <span
+                        className="rounded-full border border-[#bcd9d2] bg-[#edf8f5] px-2.5 py-1 text-xs font-bold text-[#267062]"
+                        key={source}
+                      >
+                        {sourceLabels[source] ?? source} {count}건
+                      </span>
+                    ))}
+                </div>
                 <div className="mt-4 flex flex-wrap gap-2" aria-label="적용된 추천 조건">
                   {selectedConditions.map((condition) => (
                     <span

@@ -6,7 +6,6 @@ import {
   Check,
   CircleCheck,
   LoaderCircle,
-  Radar,
   ShieldCheck,
   Sparkles,
   TrendingUp,
@@ -15,6 +14,7 @@ import {
 import { useState, type FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { ChokBrand } from '@/components/ChokBrand';
 import { submitColdEmailRequest } from '@/features/apply/submit-cold-email-request';
 import type {
   ApplicantRole,
@@ -160,12 +160,7 @@ function ApplyHeader({ copy }: { copy: RoleCopy }) {
     <>
       <header className="apply-site-header">
         <div className="apply-container apply-header-inner">
-          <a className="apply-brand" href="/" aria-label="세일즈 시그널 홈">
-            <span className="apply-brand-symbol" aria-hidden="true">
-              <Radar />
-            </span>
-            <span>세일즈 시그널</span>
-          </a>
+          <ChokBrand />
           <div className="apply-header-actions">
             <span className="apply-header-status">
               <ShieldCheck aria-hidden="true" />

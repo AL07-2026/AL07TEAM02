@@ -95,6 +95,7 @@ export type CompanyRoleAnalysis = {
   riskFlags: string[];
   evidenceUrls: string[];
   evidence: Array<{
+    source: JobSource;
     title: string;
     url: string;
     publishedAt: string;
@@ -112,4 +113,5 @@ export type TrySearchResponse = {
   collectedAt: string;
   matches: CompanyRoleAnalysis[];
   postingCount: number;
+  sourceCounts: Partial<Record<JobSource, number>>;
 };

@@ -115,4 +115,44 @@ describe('job analysis', () => {
     expect(result?.recommendationReasons.join(' ')).toContain('정규인력 충원 전');
     expect(result?.hiringSituation).not.toContain('원문 확인');
   });
+
+  it('개발자 검색어로 개발 및 엔지니어 직무 공고를 함께 찾는다', () => {
+    const [result] = analyzeCompanies(
+      [
+        posting({
+          source: 'work24',
+          title: '권상시스템개발 경력 채용',
+          description: '',
+          keywords: [],
+        }),
+      ],
+      { role: 'recruiter', query: '개발자' },
+      new Date('2026-08-12T00:00:00+09:00'),
+    );
+
+    expect(result?.evidence).toHaveLength(1);
+    expect(result?.evidence[0]?.source).toBe('work24');
+    expect(result?.hiringSituation).toContain('관련 공고 1건');
+  });
+
+  it('인사처럼 일반적인 직무 검색어도 제외하지 않고 관련 공고를 찾는다', () => {
+    const [result] = analyzeCompanies(
+      [posting({ title: 'HR 리크루터 채용', description: '인사팀 인재 영입' })],
+      { role: 'recruiter', query: '인사' },
+      new Date('2026-08-12T00:00:00+09:00'),
+    );
+
+    expect(result?.evidence).toHaveLength(1);
+    expect(result?.hiringSituation).toContain('관련 공고 1건');
+  });
+
+  it('직무명 변형을 동의어로 확장해 공고를 찾는다', () => {
+    const [result] = analyzeCompanies(
+      [posting({ title: 'UX/UI 디자인 담당', description: '프로덕트 화면 설계' })],
+      { role: 'recruiter', query: '디자이너' },
+      new Date('2026-08-12T00:00:00+09:00'),
+    );
+
+    expect(result?.evidence).toHaveLength(1);
+  });
 });

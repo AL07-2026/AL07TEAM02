@@ -14,6 +14,7 @@ import {
 import { useMemo, useState, type FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { ChokBrand } from '@/components/ChokBrand';
 import type { HomepageFeedback } from '@/features/feedback/types';
 import '@/features/apply/admin-page.css';
 
@@ -132,10 +133,7 @@ export function HomepageFeedbackAdminPage() {
   return (
     <main className="admin-page">
       <header className="admin-topbar">
-        <a className="admin-brand" href="/">
-          <span aria-hidden="true">S</span>
-          세일즈 시그널
-        </a>
+        <ChokBrand />
         <div className="admin-topbar-actions">
           <a href="/admin/cold-email-requests">콜드메일 신청</a>
           <span className="admin-security-status">

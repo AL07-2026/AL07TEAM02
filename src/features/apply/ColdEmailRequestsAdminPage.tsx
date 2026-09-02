@@ -15,6 +15,7 @@ import {
 import { useMemo, useState, type FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { ChokBrand } from '@/components/ChokBrand';
 import type { ApplicantRole, ColdEmailRequest } from '@/features/apply/types';
 import '@/features/apply/admin-page.css';
 
@@ -163,10 +164,7 @@ export function ColdEmailRequestsAdminPage() {
   return (
     <main className="admin-page">
       <header className="admin-topbar">
-        <a className="admin-brand" href="/">
-          <span aria-hidden="true">S</span>
-          세일즈 시그널
-        </a>
+        <ChokBrand />
         <span className="admin-security-status">
           <LockKeyhole aria-hidden="true" /> 관리자 전용
         </span>

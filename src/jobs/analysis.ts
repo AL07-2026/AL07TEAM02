@@ -20,6 +20,23 @@ const ignoredQueryTerms = new Set([
   '채용',
 ]);
 
+const queryTermAliases: Record<string, string[]> = {
+  개발자: ['개발', '엔지니어', 'engineer', 'developer'],
+  프론트: ['프론트엔드', 'frontend', 'react'],
+  프론트엔드: ['프론트', 'frontend', 'react'],
+  백엔드: ['서버', 'backend', 'java'],
+  마케터: ['마케팅', 'marketing'],
+  디자이너: ['디자인', 'designer', 'design', 'ux', 'ui'],
+  기획자: ['기획', '프로덕트', 'product manager', 'product owner'],
+  영업직: ['영업', '세일즈', 'sales'],
+  간호사: ['간호', 'nurse', 'nursing'],
+  인사: ['채용', '리크루터', 'recruiter', 'talent acquisition', 'hr'],
+  채용: ['인사', '리크루터', 'recruiter', 'talent acquisition', 'hr'],
+  회계사: ['회계', 'accounting'],
+  재무담당자: ['재무', 'finance'],
+  생산직: ['생산', '제조', '공정'],
+};
+
 function clamp(score: number, maximum: number) {
   return Math.min(maximum, Math.max(0, Math.round(score)));
 }
@@ -107,14 +124,14 @@ export function buildCompanySignals(
   });
 }
 
-function queryTokens(value: string) {
-  return [
-    ...new Set(
-      normalizeText(value)
-        .split(/\s+/)
-        .filter((token) => token.length >= 2 && !ignoredQueryTerms.has(token)),
-    ),
-  ];
+function queryTokens(value: string, includeGenericTerms = false) {
+  const tokens = normalizeText(value)
+    .split(/\s+/)
+    .filter(
+      (token) => token.length >= 2 && (includeGenericTerms || !ignoredQueryTerms.has(token)),
+    );
+
+  return [...new Set(tokens.flatMap((token) => [token, ...(queryTermAliases[token] ?? [])]))];
 }
 
 function searchableText(posting: NormalizedJobPosting) {
@@ -130,16 +147,24 @@ function searchableText(posting: NormalizedJobPosting) {
   );
 }
 
-function getRelevantPostings(signal: CompanyHiringSignal, query: string) {
-  const tokens = queryTokens(query);
+function getRelevantPostings(
+  signal: CompanyHiringSignal,
+  query: string,
+  includeGenericTerms = false,
+) {
+  const tokens = queryTokens(query, includeGenericTerms);
   if (!tokens.length) return [];
   return signal.evidence.filter((posting) =>
     tokens.some((token) => searchableText(posting).includes(token)),
   );
 }
 
-function getRoleFindings(postings: NormalizedJobPosting[], query: string) {
-  const tokens = queryTokens(query);
+function getRoleFindings(
+  postings: NormalizedJobPosting[],
+  query: string,
+  includeGenericTerms = false,
+) {
+  const tokens = queryTokens(query, includeGenericTerms);
   const findings = postings.flatMap((posting) => posting.roleDetails ?? []);
   const matched = findings.filter((detail) =>
     tokens.some((token) => normalizeText(detail.name).includes(token)),
@@ -222,6 +247,7 @@ function hiringSituation(
 
 function analysisEvidence(postings: NormalizedJobPosting[]) {
   return postings.slice(0, 3).map((posting) => ({
+    source: posting.source,
     title: posting.title,
     url: posting.sourceUrl,
     publishedAt: posting.publishedAt,
@@ -283,10 +309,10 @@ function analyzeRecruiter(
   signal: CompanyHiringSignal,
   request: RoleAnalysisRequest,
 ): CompanyRoleAnalysis {
-  const relevant = getRelevantPostings(signal, request.query);
-  const roleFindings = getRoleFindings(relevant, request.query);
+  const relevant = getRelevantPostings(signal, request.query, true);
+  const roleFindings = getRoleFindings(relevant, request.query, true);
   const secondaryRelevant = request.secondaryQuery
-    ? getRelevantPostings(signal, request.secondaryQuery)
+    ? getRelevantPostings(signal, request.secondaryQuery, true)
     : [];
   const fitScore =
     clamp(relevant.length * 12, 25) +
