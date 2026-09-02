@@ -32,6 +32,7 @@ import { mockTargetCompany } from '@/features/apply/mock-target-company';
 import type { ApplicantRole, TargetCompany } from '@/features/apply/types';
 import { FeedbackPage } from '@/features/feedback/FeedbackPage';
 import { HomepageFeedbackAdminPage } from '@/features/feedback/HomepageFeedbackAdminPage';
+import chokLogo from '@/assets/chok-logo.png';
 
 declare global {
   interface Window {
@@ -40,27 +41,27 @@ declare global {
 }
 
 const oldWay = [
-  '여러 채용 사이트를 직접 검색',
-  '엑셀로 기업 목록 정리',
-  '접근 우선순위를 직접 판단',
-  '기업마다 영업 근거 조사',
-  '콜드메일을 처음부터 작성',
+  '채용 사이트를 매일 직접 검색',
+  '신규 고객사 후보를 엑셀로 정리',
+  '채용 수요와 타이밍을 직접 추정',
+  '담당자와 제안 근거를 개별 조사',
+  '첫 제안 메시지를 처음부터 작성',
 ];
 
-const signalWay = [
-  '채용공고 변화 자동 분석',
-  '자사 제품과 연관된 기업 추천',
-  '확인 가능한 채용 근거 제공',
-  '기업별 추천 접촉 대상 제공',
-  '영업 포인트와 접근 문구 생성',
+const chokWay = [
+  '채용 수요 변화 자동 탐지',
+  '지금 움직이는 기업 우선 추천',
+  '확인 가능한 채용공고 근거 제공',
+  '추천 접촉 대상과 제안 타이밍 안내',
+  '고객사별 제안 포인트 정리',
 ];
 
 const steps = [
   {
     icon: BriefcaseBusiness,
     number: '01',
-    title: '우리 제품 입력',
-    description: '판매하는 제품, 해결하는 문제와 주요 고객 조건을 입력합니다.',
+    title: '찾는 채용 수요 입력',
+    description: '집중하는 포지션과 산업, 지역 등 원하는 고객사 조건을 입력합니다.',
   },
   {
     icon: BarChart3,
@@ -71,8 +72,8 @@ const steps = [
   {
     icon: Target,
     number: '03',
-    title: '영업기회 확인',
-    description: '접근할 기업과 추천 근거, 접촉 대상과 영업 포인트를 확인합니다.',
+    title: '고객사 기회 확인',
+    description: '먼저 제안할 기업과 추천 근거, 접촉 대상과 제안 포인트를 확인합니다.',
   },
 ];
 
@@ -86,14 +87,14 @@ const principles = [
   {
     icon: TrendingUp,
     label: 'SIGNAL 02',
-    title: '영업 신호 해석',
-    description: '채용 변화가 어떤 조직 변화로 이어질 수 있는지 설명합니다.',
+    title: '채용 수요 해석',
+    description: '공고 증가와 신규 포지션이 어떤 채용 수요를 나타내는지 설명합니다.',
   },
   {
     icon: Target,
-    label: 'FIT 03',
-    title: '제품 연관성',
-    description: '사용자의 제품이 해당 조직 변화와 어떤 관련이 있는지 보여드립니다.',
+    label: 'PRIORITY 03',
+    title: '접근 우선순위',
+    description: '채용 규모와 시급성을 바탕으로 먼저 검토할 기업을 보여드립니다.',
   },
 ];
 
@@ -102,16 +103,15 @@ function track(name: string, properties: Record<string, unknown> = {}) {
   window.dataLayer = window.dataLayer ?? [];
   window.dataLayer.push(event);
   window.dispatchEvent(new CustomEvent('sales-signal:event', { detail: event }));
-  console.info(`[Sales Signal] ${name}`, properties);
+  console.info(`[CHOK] ${name}`, properties);
 }
 
 function Logo() {
   return (
-    <a className="brand" href="#top" aria-label="세일즈 시그널 홈">
-      <span className="brand-symbol" aria-hidden="true">
-        <Radar />
+    <a className="brand" href="#top" aria-label="촉 홈">
+      <span className="brand-logo-frame">
+        <img className="brand-logo" src={chokLogo} alt="촉 CHOK" />
       </span>
-      <span>세일즈 시그널</span>
     </a>
   );
 }
@@ -138,17 +138,17 @@ function DemoCard({ compact = false }: { compact?: boolean }) {
           <strong>테크웨이브</strong>
           <span>B2B 소프트웨어 · 직원 120~180명</span>
         </div>
-        <span className="priority-badge">접근 우선순위 높음</span>
+        <span className="priority-badge">제안 우선순위 높음</span>
       </div>
 
       <div className="demo-metrics">
         <div>
-          <span>제품 연관도</span>
+          <span>채용 수요도</span>
           <strong className="metric-value">
             87%
-            <MetricHelp description="입력한 제품과 채용 변화의 키워드 연관성을 나타내는 데모 점수입니다." />
+            <MetricHelp description="공고 증가와 신규 직군 등 확인된 채용 변화의 강도를 나타내는 데모 점수입니다." />
           </strong>
-          <small className="metric-basis">제품·채용 키워드 일치도</small>
+          <small className="metric-basis">공고 증가·직군 확장 분석</small>
         </div>
         <div>
           <span>최근 30일 채용</span>
@@ -174,7 +174,7 @@ function DemoCard({ compact = false }: { compact?: boolean }) {
         <Sparkles />
         <div>
           <span>추천 이유</span>
-          <p>개발조직 확대로 프로젝트 및 협업 관리의 복잡성이 증가할 가능성이 있습니다.</p>
+          <p>개발직군 채용이 빠르게 늘고 신규 포지션까지 열려 인재 확보 수요가 커지고 있습니다.</p>
         </div>
       </div>
     </article>
@@ -258,7 +258,7 @@ function LandingPage() {
                 피드백
               </a>
               <a className="header-cta" href="/experience" onClick={() => trackTrial('header')}>
-                무료 체험 <ArrowRight />
+                채용 수요 찾아보기 <ArrowRight />
               </a>
             </nav>
             <a
@@ -289,22 +289,22 @@ function LandingPage() {
           <div className="container hero-grid">
             <div className="hero-copy">
               <span className="eyebrow">
-                <Sparkles /> B2B 영업을 위한 채용 데이터 인텔리전스
+                <Sparkles /> 헤드헌터를 위한 채용 수요 인텔리전스
               </span>
               <h1 className="hero-message-card">
-                <span>채용공고 속에서</span>
-                <em>지금 연락할 기업을</em>
+                <span>채용이 시작되는 순간</span>
+                <em>새로운 고객사를</em>
                 <span className="headline-last-line">
-                  찾아드립니다 <ArrowRight aria-hidden="true" />
+                  먼저 포착하세요 <ArrowRight aria-hidden="true" />
                 </span>
               </h1>
               <p>
-                자사 제품을 입력하면 기업의 채용 변화를 분석해
-                <br className="desktop-break" /> 주목할 영업 신호와 접근 근거를 보여드립니다.
+                원하는 포지션과 지역을 입력하면 공개 채용공고의 변화를 분석해
+                <br className="desktop-break" /> 지금 제안할 기업과 접근 근거를 보여드립니다.
               </p>
               <div className="hero-actions">
                 <a className="primary-button" href="/experience" onClick={() => trackTrial('hero')}>
-                  무료 체험 시작하기 <ArrowRight />
+                  채용 수요 찾아보기 <ArrowRight />
                 </a>
                 <a
                   className="secondary-button"
@@ -322,19 +322,19 @@ function LandingPage() {
                 <div>
                   <ShieldCheck />
                   <span>
-                    <strong>근거 기반</strong>채용 변화 확인
+                    <strong>실제 공고 기반</strong>확인 가능한 근거
                   </span>
                 </div>
                 <div>
                   <Radar />
                   <span>
-                    <strong>신호 탐지</strong>접근 타이밍 추천
+                    <strong>수요 포착</strong>움직이는 기업 발견
                   </span>
                 </div>
                 <div>
                   <BriefcaseBusiness />
                   <span>
-                    <strong>즉시 활용</strong>영업 포인트 제공
+                    <strong>먼저 제안</strong>접촉 타이밍 안내
                   </span>
                 </div>
               </div>
@@ -348,7 +348,7 @@ function LandingPage() {
                     <span />
                     <span />
                   </div>
-                  <strong>오늘의 영업 시그널</strong>
+                  <strong>오늘의 채용 촉</strong>
                   <span className="demo-label">예시 데이터</span>
                 </div>
                 <div className="demo-content">
@@ -362,8 +362,8 @@ function LandingPage() {
                   <div className="demo-data-notice">
                     <CircleAlert aria-hidden="true" />
                     <p>
-                      <strong>예시 화면입니다.</strong> 실제 구매 의도가 아닌 채용정보 기반
-                      추정치입니다.
+                      <strong>예시 화면입니다.</strong> 공개 채용정보를 기반으로 분석한 수요
+                      신호입니다.
                     </p>
                   </div>
                   <DemoCard compact />
@@ -400,9 +400,9 @@ function LandingPage() {
                   <span className="floating-signal-value">
                     <strong>+42%</strong>
                     <b>전주 대비</b>
-                    <MetricHelp description="지난주 대비 새로 탐지된 채용 기반 영업 신호의 증가율을 나타내는 데모 수치입니다." />
+                    <MetricHelp description="지난주 대비 새로 탐지된 채용 수요 신호의 증가율을 나타내는 데모 수치입니다." />
                   </span>
-                  <small>새로 탐지된 채용 기반 신호</small>
+                  <small>새로 탐지된 채용 수요 신호</small>
                 </div>
               </div>
             </div>
@@ -412,7 +412,7 @@ function LandingPage() {
         <section className="context-strip" aria-label="서비스 핵심 특징">
           <div className="container">
             <span>
-              채용공고를 <strong>사업 변화의 신호</strong>로
+              채용공고를 <strong>고객사 발굴의 신호</strong>로
             </span>
             <i />
             <span>
@@ -430,13 +430,13 @@ function LandingPage() {
             <div className="section-heading">
               <span className="section-label">THE PROBLEM</span>
               <h2 className="problem-message-card">
-                <span>잠재고객을 찾는 데</span>
+                <span>새로운 고객사를 찾는 데</span>
                 <em>너무 많은 시간을</em>
                 <span>쓰고 있나요?</span>
               </h2>
               <p>
-                영업 담당자는 새로운 잠재고객을 찾기 위해 여러 채용 사이트를 검색하고, 기업 목록을
-                정리하고, 어떤 기업에 먼저 연락할지 직접 판단합니다.
+                헤드헌터는 새로운 고객사를 찾기 위해 여러 채용 사이트를 검색하고, 기업 목록을
+                정리하고, 어떤 기업에 먼저 제안할지 직접 판단합니다.
               </p>
             </div>
             <div className="comparison">
@@ -452,10 +452,10 @@ function LandingPage() {
                 </div>
               </article>
               <article className="compare-card after-card">
-                <span>세일즈 시그널</span>
+                <span>촉과 함께</span>
                 <h3>근거와 함께 한눈에</h3>
                 <div>
-                  {signalWay.map((item) => (
+                  {chokWay.map((item) => (
                     <p key={item}>
                       <Check /> {item}
                     </p>
@@ -471,7 +471,7 @@ function LandingPage() {
             <div className="section-heading centered">
               <span className="section-label">HOW IT WORKS</span>
               <h2>3단계면 충분합니다</h2>
-              <p>검색과 정리는 줄이고, 고객과의 대화에 집중하세요.</p>
+              <p>검색과 정리는 줄이고, 고객사와 후보자에게 집중하세요.</p>
             </div>
             <div className="steps">
               {steps.map(({ icon: Icon, number, title, description }, index) => (
@@ -519,8 +519,8 @@ function LandingPage() {
             <div className="principle-notice">
               <ShieldCheck />
               <p>
-                <strong>세일즈 시그널은 기업의 구매 의도를 확정하지 않습니다.</strong>
-                <span>공개된 채용정보를 바탕으로 우선 검토할 영업 대상을 추천합니다.</span>
+                <strong>촉은 기업의 헤드헌팅 의뢰 의사를 확정하지 않습니다.</strong>
+                <span>공개된 채용정보를 바탕으로 먼저 검토할 고객사 후보를 추천합니다.</span>
               </p>
             </div>
           </div>
@@ -533,13 +533,13 @@ function LandingPage() {
                 <Radar />
               </span>
               <div>
-                <h2>첫 번째 영업 신호를 찾아보세요.</h2>
-                <p>회원가입 없이 자사 제품을 입력하고 추천 기업 3곳을 확인할 수 있습니다.</p>
+                <h2>첫 번째 고객사 신호를 포착하세요.</h2>
+                <p>회원가입 없이 원하는 채용 수요를 입력하고 추천 기업 3곳을 확인하세요.</p>
               </div>
             </div>
             <div className="final-cta-action">
               <a href="/experience" onClick={() => trackTrial('footer')}>
-                무료 체험 시작하기 <ArrowRight />
+                채용 수요 찾아보기 <ArrowRight />
               </a>
               <a
                 className="final-feedback-link"
@@ -558,7 +558,7 @@ function LandingPage() {
         <div className="container footer-inner">
           <div>
             <Logo />
-            <p>채용 변화에서 발견하는 새로운 B2B 영업 기회</p>
+            <p>헤드헌터를 위한 채용 수요 인텔리전스</p>
           </div>
           <p>본 페이지의 기업과 데이터는 MVP 검증을 위한 예시입니다.</p>
         </div>
@@ -598,7 +598,7 @@ function LandingPage() {
                   <strong>테크웨이브</strong>
                   <p>B2B 소프트웨어 · 직원 120~180명</p>
                 </div>
-                <span className="priority-badge">접근 우선순위 높음</span>
+                <span className="priority-badge">제안 우선순위 높음</span>
               </div>
               <div className="analysis-block fact-block">
                 <span className="analysis-number">01</span>
@@ -621,15 +621,15 @@ function LandingPage() {
               <div className="analysis-block signal-block">
                 <span className="analysis-number">02</span>
                 <div>
-                  <small>영업 신호 해석</small>
+                  <small>채용 수요 해석</small>
                   <h3>조직 확대 가능성</h3>
                   <p>
-                    개발 프로젝트와 협업 인원이 증가하면서 프로젝트 관리와 정보 공유가 복잡해질
-                    가능성이 있습니다.
+                    개발직군 충원 규모가 늘고 DevOps 포지션이 새로 열려 전문 인재 확보 수요가 커질
+                    가능성이 있습니다. 헤드헌팅 제안을 검토할 타이밍입니다.
                   </p>
                   <span className="caution">
-                    <CircleAlert /> 채용정보를 기반으로 한 추정이며 실제 구매 의도를 의미하지
-                    않습니다.
+                    <CircleAlert /> 채용정보를 기반으로 한 추정이며 실제 헤드헌팅 의뢰 의사를
+                    의미하지 않습니다.
                   </span>
                 </div>
               </div>
@@ -640,13 +640,13 @@ function LandingPage() {
                   <h3>누구에게 접근할까요?</h3>
                   <div className="contact-list">
                     <span>
-                      <Users /> CTO
+                      <Users /> 채용 담당자
                     </span>
                     <span>
-                      <Users /> 개발팀장
+                      <Users /> 채용팀장
                     </span>
                     <span>
-                      <Users /> 기술운영 담당자
+                      <Users /> 현업 조직장
                     </span>
                   </div>
                 </div>
@@ -657,7 +657,7 @@ function LandingPage() {
                 미리보기 닫기
               </button>
               <a href="/experience" onClick={() => trackTrial('hero')}>
-                무료 체험 시작하기 <ArrowRight />
+                채용 수요 찾아보기 <ArrowRight />
               </a>
             </footer>
           </section>
@@ -677,7 +677,9 @@ function ApplyPageRoute() {
   return (
     <ColdEmailRequestPage
       applicantRole={applyState?.applicantRole}
-      targetCompany={applyState?.targetCompany ?? (import.meta.env.DEV ? mockTargetCompany : undefined)}
+      targetCompany={
+        applyState?.targetCompany ?? (import.meta.env.DEV ? mockTargetCompany : undefined)
+      }
     />
   );
 }

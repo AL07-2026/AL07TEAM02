@@ -81,26 +81,25 @@ button:focus-visible {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  color: var(--ink);
+  width: 128px;
+  height: 64px;
+  overflow: hidden;
   text-decoration: none;
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: -0.6px;
 }
-.brand-symbol {
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  color: #171717;
-  border: 1px solid rgba(10, 135, 79, 0.28);
-  border-radius: 7px;
-  background: #78e3dc;
-  box-shadow: none;
+.brand-logo-frame {
+  position: relative;
+  width: 128px;
+  height: 64px;
+  display: block;
+  overflow: hidden;
 }
-.brand-symbol svg {
-  width: 19px;
+.brand-logo {
+  position: absolute;
+  width: 172px;
+  max-width: none;
+  height: auto;
+  top: -24px;
+  left: -21px;
 }
 .site-nav {
   display: flex;
@@ -123,7 +122,10 @@ button:focus-visible {
   border-radius: 6px;
   background: #fff;
   text-decoration: none;
-  transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    background 160ms ease;
 }
 .admin-shortcut:hover {
   color: #0a874f;
@@ -1238,11 +1240,17 @@ button:focus-visible {
   gap: 22px;
 }
 .site-footer .brand {
-  font-size: 14px;
+  width: 88px;
+  height: 45px;
 }
-.site-footer .brand-symbol {
-  width: 30px;
-  height: 30px;
+.site-footer .brand-logo-frame {
+  width: 88px;
+  height: 45px;
+}
+.site-footer .brand-logo {
+  width: 118px;
+  top: -16px;
+  left: -15px;
 }
 .footer-inner p {
   margin: 0;
