@@ -6,6 +6,14 @@
   },
   "rewrites": [
     {
+      "source": "/mail-full",
+      "destination": "/mail-full/index.html"
+    },
+    {
+      "source": "/mail-full/",
+      "destination": "/mail-full/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

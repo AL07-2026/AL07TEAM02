@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CHOK 콜드메일 디자인 미리보기 10종" />
+    <title>메일 미리보기 | CHOK</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #073f3c;
+        --muted: #58706d;
+        --brand: #08b3aa;
+        --brand-dark: #087a74;
+        --cream: #fff9df;
+        --line: #d8e5e3;
+        --paper: #ffffff;
+        --canvas: #f1f7f6;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 12% 0%, rgba(8, 179, 170, 0.14), transparent 28rem),
+          var(--canvas);
+        font-family: Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo', system-ui, sans-serif;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .site-header {
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        border-bottom: 1px solid rgba(7, 63, 60, 0.1);
+        background: rgba(241, 247, 246, 0.9);
+        backdrop-filter: blur(18px);
+      }
+
+      .header-inner,
+      main {
+        width: min(100% - 32px, 1240px);
+        margin-inline: auto;
+      }
+
+      .header-inner {
+        display: flex;
+        min-height: 68px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        text-decoration: none;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 34px;
+        height: 34px;
+        place-items: center;
+        border-radius: 11px 11px 11px 4px;
+        color: white;
+        background: var(--brand);
+        font-size: 0.78rem;
+        letter-spacing: 0;
+      }
+
+      .count {
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        background: var(--paper);
+        font-size: 0.875rem;
+        font-weight: 700;
+      }
+
+      main {
+        padding: 52px 0 80px;
+      }
+
+      .intro {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 32px;
+        margin-bottom: 30px;
+      }
+
+      .eyebrow {
+        margin: 0 0 10px;
+        color: var(--brand-dark);
+        font-size: 0.875rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 4.5rem);
+        line-height: 1.04;
+        letter-spacing: -0.06em;
+      }
+
+      .intro-copy {
+        max-width: 36rem;
+        margin: 16px 0 0;
+        color: var(--muted);
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+
+      .tip {
+        margin: 0;
+        padding: 10px 14px;
+        border-radius: 12px;
+        color: var(--ink);
+        background: var(--cream);
+        font-size: 0.875rem;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+      }
+
+      figure {
+        overflow: hidden;
+        margin: 0;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+        box-shadow: 0 18px 50px rgba(7, 63, 60, 0.08);
+        transition:
+          transform 180ms ease,
+          box-shadow 180ms ease;
+      }
+
+      figure:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 24px 60px rgba(7, 63, 60, 0.14);
+      }
+
+      figure a {
+        display: block;
+        text-decoration: none;
+      }
+
+      figure img {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #eef3f2;
+      }
+
+      figcaption {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 56px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--line);
+        font-size: 0.9375rem;
+        font-weight: 800;
+      }
+
+      .open-label {
+        color: var(--brand-dark);
+        font-size: 0.8125rem;
+      }
+
+      footer {
+        width: min(100% - 32px, 1240px);
+        margin: 0 auto;
+        padding: 0 0 40px;
+        color: var(--muted);
+        font-size: 0.875rem;
+        text-align: center;
+      }
+
+      a:focus-visible {
+        outline: 3px solid var(--brand);
+        outline-offset: 4px;
+      }
+
+      @media (max-width: 760px) {
+        .header-inner,
+        main,
+        footer {
+          width: min(100% - 24px, 1240px);
+        }
+
+        main {
+          padding-top: 36px;
+        }
+
+        .intro {
+          grid-template-columns: 1fr;
+          gap: 18px;
+        }
+
+        .tip {
+          width: fit-content;
+          white-space: normal;
+        }
+
+        .gallery {
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+
+        figure {
+          border-radius: 14px;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        figure {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/" aria-label="CHOK 홈으로 이동">
+          <span class="brand-mark" aria-hidden="true">CHOK</span>
+          <span>메일 미리보기</span>
+        </a>
+        <span class="count">10개 디자인</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="gallery-title">
+        <div>
+          <p class="eyebrow">CHOK MAIL COLLECTION</p>
+          <h1 id="gallery-title">콜드메일 디자인</h1>
+          <p class="intro-copy">보내기 전 전체 구성을 한눈에 비교해 보세요.</p>
+        </div>
+        <p class="tip">이미지를 누르면 원본 크기로 열립니다.</p>
+      </section>
+
+      <section class="gallery" aria-label="콜드메일 디자인 10종">
+        <figure>
+          <a href="./full-01.png" target="_blank" rel="noopener">
+            <img
+              src="./full-01.png"
+              width="1536"
+              height="1024"
+              alt="콜드메일 디자인 01 전체 미리보기"
+              fetchpriority="high"
+            />
+            <figcaption><span>메일 01</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-02.png" target="_blank" rel="noopener">
+            <img
+              src="./full-02.png"
+              width="1448"
+              height="1086"
+              alt="콜드메일 디자인 02 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 02</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-03.png" target="_blank" rel="noopener">
+            <img
+              src="./full-03.png"
+              width="1536"
+              height="1024"
+              alt="콜드메일 디자인 03 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 03</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-04.png" target="_blank" rel="noopener">
+            <img
+              src="./full-04.png"
+              width="1448"
+              height="1086"
+              alt="콜드메일 디자인 04 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 04</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-05.png" target="_blank" rel="noopener">
+            <img
+              src="./full-05.png"
+              width="1448"
+              height="1086"
+              alt="콜드메일 디자인 05 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 05</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-06.png" target="_blank" rel="noopener">
+            <img
+              src="./full-06.png"
+              width="1448"
+              height="1086"
+              alt="콜드메일 디자인 06 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 06</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-07.png" target="_blank" rel="noopener">
+            <img
+              src="./full-07.png"
+              width="1448"
+              height="1086"
+              alt="콜드메일 디자인 07 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 07</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-08.png" target="_blank" rel="noopener">
+            <img
+              src="./full-08.png"
+              width="1536"
+              height="1024"
+              alt="콜드메일 디자인 08 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 08</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-09.png" target="_blank" rel="noopener">
+            <img
+              src="./full-09.png"
+              width="1448"
+              height="1086"
+              alt="콜드메일 디자인 09 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 09</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+        <figure>
+          <a href="./full-10.png" target="_blank" rel="noopener">
+            <img
+              src="./full-10.png"
+              width="1536"
+              height="1024"
+              alt="콜드메일 디자인 10 전체 미리보기"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption><span>메일 10</span><span class="open-label">원본 보기 ↗</span></figcaption>
+          </a>
+        </figure>
+      </section>
+    </main>
+
+    <footer>CHOK · 헤드헌터를 위한 채용 수요 인텔리전스</footer>
+  </body>
+</html>
