@@ -179,13 +179,21 @@ function DemoCard({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function LandingPage() {
+const trackingLandingPathPattern = /^\/t\/(?:0[1-9]|10)$/;
+
+export function LandingPage() {
+  const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
   const demoRef = useRef<HTMLDivElement>(null);
   const howRef = useRef<HTMLElement>(null);
   const landingTracked = useRef(false);
   const observedSections = useRef(new Set<string>());
+
+  useEffect(() => {
+    if (!trackingLandingPathPattern.test(pathname)) return;
+    document.getElementById('interest-topics')?.scrollIntoView({ block: 'start' });
+  }, [pathname]);
 
   useEffect(() => {
     if (!landingTracked.current) {

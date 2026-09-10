@@ -4,13 +4,6 @@
       "maxDuration": 30
     }
   },
-  "redirects": [
-    {
-      "source": "/t/:id(0[1-9]|10)",
-      "destination": "https://al07team02.vercel.app/#interest-topics",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/mail-full",
