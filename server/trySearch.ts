@@ -11,6 +11,7 @@ import type {
 } from '../src/jobs/types.js';
 import { fetchAlioJobs } from './alioClient.js';
 import { fetchAlioJobDetail } from './alioDetail.js';
+import { enrichJobPostingContacts } from './jobContactEnrichment.js';
 import { JobStore } from './jobStore.js';
 import { runJobPipeline } from './jobPipeline.js';
 import { fetchJoobleJobs } from './joobleClient.js';
@@ -57,6 +58,15 @@ function filterByRegion(postings: NormalizedJobPosting[], region: TrySearchReque
 
 function hasDirectMatch(result: ReturnType<typeof analyzeCompanies>[number]) {
   return result.evidenceUrls.length > 0;
+}
+
+function hasContactLead(posting: NormalizedJobPosting) {
+  return Boolean(
+    posting.contactInfo?.email ||
+      posting.contactInfo?.phone ||
+      posting.contactInfo?.contactPageUrl ||
+      posting.contactInfo?.estimatedEmails?.length,
+  );
 }
 
 function readPostings() {
@@ -244,6 +254,38 @@ async function enrichMatchedPostings(
   );
 }
 
+async function enrichMatchedPostingContacts(
+  postings: NormalizedJobPosting[],
+  request: TrySearchRequest,
+  now: Date,
+) {
+  if (process.env.DISABLE_CONTACT_ENRICHMENT === 'true') return postings;
+
+  const initialMatches = analyzeCompanies(postings, request, now)
+    .filter(hasDirectMatch)
+    .slice(0, 20);
+  const evidenceUrls = new Set(initialMatches.flatMap((match) => match.evidenceUrls));
+  const targets = postings
+    .filter((posting) => evidenceUrls.has(posting.sourceUrl) && !hasContactLead(posting))
+    .slice(0, 20);
+  if (!targets.length) return postings;
+
+  const enriched = await enrichJobPostingContacts(targets);
+  const enrichedById = new Map(
+    enriched.map((posting) => [`${posting.source}:${posting.externalId}`, posting]),
+  );
+  const store = new JobStore(databasePath);
+  try {
+    store.import(enriched);
+  } finally {
+    store.close();
+  }
+
+  return postings.map(
+    (posting) => enrichedById.get(`${posting.source}:${posting.externalId}`) ?? posting,
+  );
+}
+
 export async function searchTryCompanies(
   rawRequest: unknown,
   now = new Date(),
@@ -290,6 +332,7 @@ export async function searchTryCompanies(
 
   let filteredPostings = filterByRegion(postings, request.region);
   filteredPostings = await enrichMatchedPostings(filteredPostings, request, now);
+  filteredPostings = await enrichMatchedPostingContacts(filteredPostings, request, now);
   const matches = analyzeCompanies(filteredPostings, request, now)
     .filter(hasDirectMatch)
     .slice(0, 20);

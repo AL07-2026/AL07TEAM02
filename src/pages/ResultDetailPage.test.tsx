@@ -25,6 +25,12 @@ const analysis: CompanyRoleAnalysis = {
       publishedAt: '2026-09-01T00:00:00.000Z',
       location: '서울',
       headcount: 2,
+      contactInfo: {
+        name: '김채용',
+        department: '인사팀',
+        email: 'recruit@testlab.example',
+        phone: '02-1234-5678',
+      },
     },
   ],
   roleFindings: [
@@ -63,6 +69,15 @@ describe('ResultDetailPage', () => {
     expect(screen.getByText('디자인 조직을 확장하는 흐름으로 분석됩니다.')).toBeInTheDocument();
     expect(screen.getByText('디자이너 공고가 현재 진행 중입니다.')).toBeInTheDocument();
     expect(screen.getAllByText('고용24')).toHaveLength(2);
+    expect(screen.getByText('인사팀 · 김채용')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /recruit@testlab.example/ })).toHaveAttribute(
+      'href',
+      'mailto:recruit@testlab.example',
+    );
+    expect(screen.getByRole('link', { name: /02-1234-5678/ })).toHaveAttribute(
+      'href',
+      'tel:0212345678',
+    );
     expect(screen.queryByText('14명')).not.toBeInTheDocument();
     expect(screen.queryByText('RevOps')).not.toBeInTheDocument();
   });

@@ -253,6 +253,7 @@ function analysisEvidence(postings: NormalizedJobPosting[]) {
     publishedAt: posting.publishedAt,
     location: posting.location,
     headcount: posting.headcount,
+    contactInfo: posting.contactInfo,
   }));
 }
 

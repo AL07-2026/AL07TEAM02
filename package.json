@@ -25,6 +25,7 @@
     "node": ">=22.22.2 <23 || >=24.15.0 <25"
   },
   "dependencies": {
+    "@vercel/analytics": "2.0.1",
     "cfb": "1.2.2",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",

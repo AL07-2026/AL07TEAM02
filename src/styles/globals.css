@@ -2072,6 +2072,49 @@ button:focus-visible {
   font-size: 13px;
   line-height: 1.6;
 }
+.posting-contact-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.posting-contact-list span,
+.posting-contact-list a,
+.posting-contact-list em {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: #f8fbfa;
+  color: #405851;
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+.posting-contact-list em {
+  color: #007d65;
+  background: #e8f5f1;
+  font-style: normal;
+}
+.posting-contact-list em[data-status='needs_verification'],
+.posting-contact-list span[data-status='needs_verification'] {
+  color: #7a5a00;
+  background: #fff9df;
+}
+.posting-contact-list a {
+  color: #00866c;
+  text-decoration: none;
+}
+.posting-contact-list a:hover {
+  text-decoration: underline;
+}
+.posting-contact-list svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
 .coldmail-list article {
   display: flex;
   gap: 12px;

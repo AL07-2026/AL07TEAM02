@@ -7,6 +7,7 @@ import type {
   ColdEmailRequestDraft,
   TargetCompany,
 } from '../src/features/apply/types.js';
+import { sendColdEmailResult } from './coldEmailDelivery.js';
 
 type SupabaseColdEmailRequestRow = {
   id: string;
@@ -53,11 +54,54 @@ function readApplicantRole(value: unknown): ApplicantRole {
   return value === 'recruiter' || value === 'investor' ? value : 'sales';
 }
 
+function parseContactInfo(value: unknown): NonNullable<TargetCompany['contacts']>[number] | null {
+  if (!isRecord(value)) return null;
+
+  type TargetContact = NonNullable<TargetCompany['contacts']>[number];
+  const estimatedEmails = Array.isArray(value.estimatedEmails)
+    ? value.estimatedEmails
+        .map(readString)
+        .filter((email) => emailPattern.test(email))
+    : [];
+  const source: TargetContact['source'] =
+    value.source === 'posting_field' ||
+    value.source === 'posting_html' ||
+    value.source === 'company_page' ||
+    value.source === 'estimated'
+      ? value.source
+      : undefined;
+  const verificationStatus: TargetContact['verificationStatus'] =
+    value.verificationStatus === 'confirmed' || value.verificationStatus === 'needs_verification'
+      ? value.verificationStatus
+      : undefined;
+  const contact = {
+    ...(readString(value.sourceTitle) ? { sourceTitle: readString(value.sourceTitle) } : {}),
+    ...(readString(value.sourceUrl) ? { sourceUrl: readString(value.sourceUrl) } : {}),
+    ...(readString(value.name) ? { name: readString(value.name) } : {}),
+    ...(readString(value.department) ? { department: readString(value.department) } : {}),
+    ...(readString(value.email) ? { email: readString(value.email) } : {}),
+    ...(readString(value.phone) ? { phone: readString(value.phone) } : {}),
+    ...(readString(value.contactPageUrl) ? { contactPageUrl: readString(value.contactPageUrl) } : {}),
+    ...(estimatedEmails.length ? { estimatedEmails } : {}),
+    ...(source ? { source } : {}),
+    ...(verificationStatus ? { verificationStatus } : {}),
+  };
+
+  return Object.values(contact).some(Boolean) ? contact : null;
+}
+
 function parseTargetCompany(value: unknown): TargetCompany | null {
   if (!isRecord(value)) return null;
 
   const name = readString(value.name);
   if (!name) return null;
+  const contacts = Array.isArray(value.contacts)
+    ? value.contacts
+        .map(parseContactInfo)
+        .filter((contact): contact is NonNullable<TargetCompany['contacts']>[number] =>
+          Boolean(contact),
+        )
+    : [];
 
   return {
     ...(readString(value.id) ? { id: readString(value.id) } : {}),
@@ -70,6 +114,7 @@ function parseTargetCompany(value: unknown): TargetCompany | null {
     ...(readString(value.recommendationReason)
       ? { recommendationReason: readString(value.recommendationReason) }
       : {}),
+    ...(contacts.length ? { contacts } : {}),
   };
 }
 
@@ -186,7 +231,10 @@ export async function createColdEmailRequest(
   draft: ColdEmailRequestDraft,
 ): Promise<ColdEmailRequest> {
   const supabase = getSupabaseConfig();
-  if (!supabase) return createLocalColdEmailRequest(draft);
+  if (!supabase) {
+    const request = await createLocalColdEmailRequest(draft);
+    return { ...request, delivery: await sendColdEmailResult(draft) };
+  }
 
   try {
     const response = await fetch(`${supabase.restUrl}?select=*`, {
@@ -204,10 +252,12 @@ export async function createColdEmailRequest(
     const row = rows[0];
     if (!row) throw new Error('저장된 신청 정보를 확인할 수 없습니다.');
 
-    return toColdEmailRequest(row);
+    const request = toColdEmailRequest(row);
+    return { ...request, delivery: await sendColdEmailResult(draft) };
   } catch (error) {
     console.warn('[Sales Signal] Supabase 콜드메일 신청 저장 실패, 로컬 파일에 저장합니다.', error);
-    return createLocalColdEmailRequest(draft);
+    const request = await createLocalColdEmailRequest(draft);
+    return { ...request, delivery: await sendColdEmailResult(draft) };
   }
 }
 

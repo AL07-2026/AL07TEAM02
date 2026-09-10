@@ -47,7 +47,9 @@
 4. `data/job-signals.db`에서 normalized 샘플을 제외한 공고를 읽는다.
 5. 설정된 키가 있고 데이터가 오래되었으면 ALIO 또는 검색 조건별 Jooble 데이터를 갱신한다. 갱신 간격은 코드상 6시간이다.
 6. 지역 필터와 ALIO 상세정보 보강 후 `src/jobs/analysis.ts`가 기업별 결과를 만든다.
-7. 근거 URL이 있는 결과 중 최대 20개를 응답한다.
+7. 상위 관련 공고 원문 HTML에서 공개 이메일, 전화번호, 채용 문의 링크를 보강한다.
+8. 확정 연락처가 없고 회사 도메인을 확인할 수 있으면 대표 채용 이메일 후보를 `검증 필요`로 제공한다.
+9. 근거 URL이 있는 결과 중 최대 20개를 응답한다.
 
 검색 입력은 `TryPage` 상태에만 보관되며 화면 문구상 저장하지 않는다고 안내한다. 반면 외부에서 수집한 채용공고는 SQLite와 `data/raw`에 저장된다.
 
@@ -66,7 +68,9 @@ SQLite의 주요 테이블은 `job_postings`, `job_snapshots`다. `(source, exte
 
 ## 콜드메일 신청 흐름
 
-상세 분석 화면이 대상 기업 요약을 `/apply`의 라우트 상태로 넘긴다. 신청 폼은 이메일, 회사명, 제품명, 제품 설명, 선택 요청사항, 정보 처리 동의를 검증한다. `submit-cold-email-request.ts`는 개발 환경에서만 클라이언트 시각을 붙여 성공 응답을 만들며, 운영 환경에서는 `Backend endpoint 연결이 필요합니다.` 오류를 발생시킨다.
+상세 분석 화면이 대상 기업 요약과 공개 채용담당자 연락처를 `/apply`의 라우트 상태로 넘긴다. 신청 폼은 이메일, 회사명, 제품명, 제품 설명, 선택 요청사항, 정보 처리 동의를 검증한다. `POST /api/cold-email-requests`는 신청 내용을 Supabase 설정이 있으면 `cold_email_requests` 테이블에 저장하고, 설정이 없거나 실패하면 `data/cold-email-requests.jsonl`에 저장한다.
+
+신청 저장 뒤 `server/coldEmailDelivery.ts`가 콜드메일 초안을 생성해 신청자의 이메일로 발송을 시도한다. 실제 발송은 `RESEND_API_KEY`와 `COLD_EMAIL_FROM`이 설정된 경우에만 동작하며, 설정이 없으면 접수는 유지하고 발송 상태를 `skipped`로 반환한다.
 
 ## 테스트와 빌드
 

@@ -8,7 +8,21 @@ const validPayload = {
   applicantCompany: 'ABC Labs',
   productName: 'AI 세일즈 코파일럿',
   productDescription: 'B2B 영업팀이 기업 조사와 맞춤 메시지 작성 시간을 줄이도록 돕는 서비스입니다.',
-  targetCompany: { name: '테스트 기업', industry: 'SaaS' },
+  targetCompany: {
+    name: '테스트 기업',
+    industry: 'SaaS',
+    contacts: [
+      {
+        sourceTitle: '채용담당자 공고',
+        email: ' recruit@test.example ',
+        phone: ' 02-1234-5678 ',
+        contactPageUrl: ' https://example.com/contact/recruit ',
+        estimatedEmails: [' hr@test.example ', 'not-an-email'],
+        source: 'estimated',
+        verificationStatus: 'needs_verification',
+      },
+    ],
+  },
   privacyAgreed: true,
 };
 
@@ -21,6 +35,20 @@ it('콜드메일 신청 payload를 저장 가능한 draft로 정리한다', () =
     }),
   ).toEqual({
     ...validPayload,
+    targetCompany: {
+      ...validPayload.targetCompany,
+      contacts: [
+        {
+          sourceTitle: '채용담당자 공고',
+          email: 'recruit@test.example',
+          phone: '02-1234-5678',
+          contactPageUrl: 'https://example.com/contact/recruit',
+          estimatedEmails: ['hr@test.example'],
+          source: 'estimated',
+          verificationStatus: 'needs_verification',
+        },
+      ],
+    },
     additionalRequest: '짧게 작성해주세요.',
   });
 });

@@ -34,7 +34,15 @@ function fillValidForm() {
 describe('ColdEmailRequestPage', () => {
   beforeEach(() => {
     mockedSubmit.mockImplementation((request) =>
-      Promise.resolve({ ...request, submittedAt: '2026-08-13T00:00:00.000Z' }),
+      Promise.resolve({
+        ...request,
+        submittedAt: '2026-08-13T00:00:00.000Z',
+        delivery: {
+          status: 'sent',
+          provider: 'resend',
+          message: '입력한 이메일로 콜드메일 초안을 발송했습니다.',
+        },
+      }),
     );
   });
 
@@ -52,6 +60,46 @@ describe('ColdEmailRequestPage', () => {
 
     expect(screen.getByText('선택된 기업 정보가 없습니다.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '맞춤 콜드메일 제작 신청하기' })).toBeDisabled();
+  });
+
+  it('선택한 기업의 공개 채용담당자 연락처를 보여준다', () => {
+    render(
+      <ColdEmailRequestPage
+        targetCompany={{
+          name: '테스트 기업',
+          contacts: [
+            {
+              sourceTitle: '백엔드 개발자 모집',
+              sourceUrl: 'https://example.com/jobs/backend',
+              name: '김채용',
+              department: '인사팀',
+              email: 'recruit@test.example',
+              phone: '02-1234-5678',
+              contactPageUrl: 'https://example.com/contact/recruit',
+              estimatedEmails: ['hr@test.example'],
+              verificationStatus: 'needs_verification',
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText('백엔드 개발자 모집')).toBeInTheDocument();
+    expect(screen.getByText('인사팀 · 김채용')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /recruit@test.example/ })).toHaveAttribute(
+      'href',
+      'mailto:recruit@test.example',
+    );
+    expect(screen.getByRole('link', { name: /02-1234-5678/ })).toHaveAttribute(
+      'href',
+      'tel:0212345678',
+    );
+    expect(screen.getByRole('link', { name: '채용 문의 페이지' })).toHaveAttribute(
+      'href',
+      'https://example.com/contact/recruit',
+    );
+    expect(screen.getByText('검증 필요')).toBeInTheDocument();
+    expect(screen.getByText('hr@test.example')).toBeInTheDocument();
   });
 
   it('필수 입력값을 한국어로 검증한다', () => {
@@ -103,6 +151,9 @@ describe('ColdEmailRequestPage', () => {
       }),
     );
     expect(screen.getByText(/sales@example.com/)).toBeInTheDocument();
+    expect(
+      screen.getByText('입력한 이메일로 콜드메일 초안을 발송했습니다.'),
+    ).toBeInTheDocument();
   });
 
   it('submit 실패 시 입력값을 유지하고 오류를 표시한다', async () => {

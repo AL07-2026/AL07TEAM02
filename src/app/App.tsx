@@ -33,6 +33,10 @@ import { mockTargetCompany } from '@/features/apply/mock-target-company';
 import type { ApplicantRole, TargetCompany } from '@/features/apply/types';
 import { FeedbackPage } from '@/features/feedback/FeedbackPage';
 import { HomepageFeedbackAdminPage } from '@/features/feedback/HomepageFeedbackAdminPage';
+import { TopicInterestAdminPage } from '@/features/topic-interest/TopicInterestAdminPage';
+import { TopicInterestSection } from '@/features/topic-interest/TopicInterestSection';
+import { getCompanyContactFallback } from '@/jobs/contactHints';
+import { readCompanyAnalysis } from '@/jobs/analysisSession';
 
 declare global {
   interface Window {
@@ -241,6 +245,9 @@ function LandingPage() {
               <a href="#how" onClick={() => setMenuOpen(false)}>
                 이용 방법
               </a>
+              <a href="#interest-topics" onClick={() => setMenuOpen(false)}>
+                관심 리스트
+              </a>
               <a
                 className="header-feedback"
                 href="/feedback"
@@ -418,6 +425,8 @@ function LandingPage() {
             </span>
           </div>
         </section>
+
+        <TopicInterestSection />
 
         <section className="section problem-section">
           <div className="container problem-grid">
@@ -667,14 +676,36 @@ function ApplyPageRoute() {
     targetCompany?: TargetCompany;
     applicantRole?: ApplicantRole;
   } | null;
+  const selectedTargetCompany =
+    applyState?.targetCompany ?? (import.meta.env.DEV ? mockTargetCompany : undefined);
+  const storedAnalysis = selectedTargetCompany
+    ? readCompanyAnalysis(selectedTargetCompany.name)
+    : null;
+  const fallbackContact = selectedTargetCompany
+    ? getCompanyContactFallback(selectedTargetCompany.name)
+    : undefined;
+  const storedContacts =
+    storedAnalysis?.evidence
+      .filter((evidence) => evidence.contactInfo)
+      .map((evidence) => ({
+        sourceTitle: evidence.title,
+        sourceUrl: evidence.url,
+        ...evidence.contactInfo,
+      })) ?? [];
+  const contacts = [
+    ...(selectedTargetCompany?.contacts ?? []),
+    ...storedContacts,
+    ...(fallbackContact ? [{ sourceTitle: '기업 채용 페이지', ...fallbackContact }] : []),
+  ];
+  const targetCompany = selectedTargetCompany
+    ? {
+        ...selectedTargetCompany,
+        ...(contacts.length ? { contacts } : {}),
+      }
+    : undefined;
 
   return (
-    <ColdEmailRequestPage
-      applicantRole={applyState?.applicantRole}
-      targetCompany={
-        applyState?.targetCompany ?? (import.meta.env.DEV ? mockTargetCompany : undefined)
-      }
-    />
+    <ColdEmailRequestPage applicantRole={applyState?.applicantRole} targetCompany={targetCompany} />
   );
 }
 
@@ -689,6 +720,7 @@ const router = createBrowserRouter([
   { path: '/apply', Component: ApplyPageRoute },
   { path: '/feedback', Component: FeedbackPage },
   { path: '/admin/homepage-feedback', Component: HomepageFeedbackAdminPage },
+  { path: '/admin/topic-interests', Component: TopicInterestAdminPage },
   { path: '/admin/cold-email-requests', Component: ColdEmailRequestsAdminPage },
   { path: '*', Component: LandingPage },
 ]);

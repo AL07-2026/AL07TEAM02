@@ -19,6 +19,12 @@ describe('normalizeJobPosting', () => {
       expiresAt: null,
       active: true,
       collectedAt: '2026-08-12T00:00:00+09:00',
+      contactInfo: {
+        name: '  김채용  ',
+        department: ' 인사팀 ',
+        email: ' Recruit@Example.COM ',
+        phone: '02 ) 1234 ) 5678',
+      },
     });
 
     expect(normalizeCompanyName('(주)플로우데스크')).toBe(normalizeCompanyName('플로우데스크'));
@@ -26,6 +32,12 @@ describe('normalizeJobPosting', () => {
     expect(posting.seniority).toBe('lead');
     expect(posting.skills).toEqual(expect.arrayContaining(['Java', 'AWS']));
     expect(posting.qualityScore).toBe(100);
+    expect(posting.contactInfo).toEqual({
+      name: '김채용',
+      department: '인사팀',
+      email: 'recruit@example.com',
+      phone: '02-1234-5678',
+    });
   });
 
   it('필수 데이터가 비어 있으면 저장 전에 거부한다', () => {

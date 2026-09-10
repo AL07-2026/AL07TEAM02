@@ -54,9 +54,16 @@ PowerShell 실행 정책 때문에 `npm.ps1`이 막히면 `npm.cmd run setup`처
 
 직접 접근과 정상 상세 화면 경유를 나누어 확인한다.
 
-## 콜드메일 신청이 운영에서 실패함
+## 콜드메일 초안 이메일이 오지 않음
 
-`submit-cold-email-request.ts`는 개발 환경에서만 Mock 성공을 반환하고 운영에서는 백엔드 연결 필요 오류를 발생시킨다. 현재 운영 접수 엔드포인트는 작업 트리에서 확인되지 않는다.
+`POST /api/cold-email-requests`는 신청을 저장한 뒤 신청자 이메일로 콜드메일 초안 발송을 시도한다. 실제 발송에는 `RESEND_API_KEY`와 `COLD_EMAIL_FROM`이 필요하다.
+
+확인 순서:
+
+1. 신청 완료 화면의 발송 상태가 `sent`, `skipped`, `failed` 중 무엇인지 확인한다.
+2. `skipped`이면 `RESEND_API_KEY`와 `COLD_EMAIL_FROM`이 실행 환경에 주입됐는지 확인한다.
+3. `failed`이면 Resend 응답 메시지, 발신 도메인 검증 상태, 수신자 주소 오타를 확인한다.
+4. 신청 자체가 접수됐는지는 Supabase 또는 `data/cold-email-requests.jsonl`에서 확인한다.
 
 ## Firebase 경로에서 404가 발생함
 

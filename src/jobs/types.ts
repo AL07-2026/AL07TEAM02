@@ -24,6 +24,17 @@ export type JobRoleDetail = {
   hiringReason: string;
 };
 
+export type JobContactInfo = {
+  name?: string;
+  department?: string;
+  email?: string;
+  phone?: string;
+  contactPageUrl?: string;
+  estimatedEmails?: string[];
+  source?: 'posting_field' | 'posting_html' | 'company_page' | 'estimated';
+  verificationStatus?: 'confirmed' | 'needs_verification';
+};
+
 export type NormalizedJobPosting = {
   source: JobSource;
   externalId: string;
@@ -47,6 +58,7 @@ export type NormalizedJobPosting = {
   collectedAt: string;
   fingerprint: string;
   qualityScore: number;
+  contactInfo?: JobContactInfo;
   roleDetails?: JobRoleDetail[];
 };
 
@@ -101,6 +113,7 @@ export type CompanyRoleAnalysis = {
     publishedAt: string;
     location: string;
     headcount: number | null;
+    contactInfo?: JobContactInfo;
   }>;
   roleFindings: JobRoleDetail[];
 };

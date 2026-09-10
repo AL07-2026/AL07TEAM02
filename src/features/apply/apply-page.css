@@ -335,6 +335,117 @@
   line-height: 1.65;
 }
 
+.apply-contact-panel {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid #e8ebe9;
+  border-radius: 7px;
+  background: #f8fbfa;
+}
+
+.apply-contact-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apply-contact-heading span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #087a74;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.apply-contact-heading svg,
+.apply-contact-list svg {
+  width: 14px;
+  height: 14px;
+}
+
+.apply-contact-heading small {
+  color: #7b8783;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.apply-contact-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.apply-contact-list li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e1e7e4;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.apply-contact-source {
+  flex: 1 0 100%;
+  margin: 0;
+  color: #454545;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.apply-contact-list span,
+.apply-contact-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 6px 8px;
+  color: #405851;
+  border-radius: 6px;
+  background: #eef7f4;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+.apply-contact-list a {
+  color: #087a74;
+}
+
+.apply-contact-list a:hover {
+  text-decoration: underline;
+}
+
+.apply-contact-list .apply-contact-origin {
+  color: #5f5f5f;
+  background: #f4f5f4;
+}
+
+.apply-contact-status {
+  color: #087a74;
+  background: #e8f8f6;
+}
+
+.apply-contact-status[data-status='needs_verification'],
+.apply-contact-estimate {
+  color: #7a5a00;
+  background: #fff9df;
+}
+
+.apply-contact-empty {
+  margin: 11px 0 0;
+  color: #6f7673;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 .apply-empty-company {
   display: flex;
   align-items: flex-start;
@@ -496,6 +607,32 @@
   border-radius: 6px;
   background: #f8f9f8;
   font-size: 12px;
+}
+
+.apply-delivery-status {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.apply-delivery-status.sent {
+  color: #075e5a;
+  border: 1px solid #bde9dd;
+  background: #effbf8;
+}
+
+.apply-delivery-status.skipped {
+  color: #6c5a1f;
+  border: 1px solid #ead8b8;
+  background: #fff9df;
+}
+
+.apply-delivery-status.failed {
+  color: #a03d25;
+  border: 1px solid #f2c7bb;
+  background: #fff2ef;
 }
 
 .apply-mock-note {

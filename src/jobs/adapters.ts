@@ -1,5 +1,5 @@
 import { normalizeJobPosting } from './normalize.js';
-import type { NormalizedJobInput, NormalizedJobPosting } from './types.js';
+import type { JobContactInfo, NormalizedJobInput, NormalizedJobPosting } from './types.js';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -19,6 +19,12 @@ export type AlioJobRecord = {
   aplyQlfcCn?: string | null;
   scrnprcdrMthdExpln?: string | null;
   prefCn?: string | null;
+  picNm?: string | null;
+  chargPicNm?: string | null;
+  inqryTelNo?: string | null;
+  chargTelNo?: string | null;
+  inqryEmail?: string | null;
+  chargEmail?: string | null;
 };
 
 function isRecord(value: unknown): value is UnknownRecord {
@@ -35,6 +41,10 @@ function getString(value: unknown, fallback = '') {
   if (typeof value === 'string') return value;
   if (typeof value === 'number') return String(value);
   return fallback;
+}
+
+function firstString(record: UnknownRecord, keys: string[]) {
+  return keys.map((key) => getString(record[key]).trim()).find(Boolean);
 }
 
 function getNamedValue(value: unknown) {
@@ -96,6 +106,31 @@ function stripMarkup(value: string) {
     .trim();
 }
 
+function extractEmail(value: string) {
+  return value.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
+}
+
+function contactInfoFromRecord(
+  record: UnknownRecord,
+  keys: {
+    name?: string[];
+    department?: string[];
+    email?: string[];
+    phone?: string[];
+    text?: string[];
+  },
+): JobContactInfo | undefined {
+  const text = keys.text?.map((key) => getString(record[key])).join(' ') ?? '';
+  const contactInfo: JobContactInfo = {
+    name: firstString(record, keys.name ?? []),
+    department: firstString(record, keys.department ?? []),
+    email: firstString(record, keys.email ?? []) ?? extractEmail(text),
+    phone: firstString(record, keys.phone ?? []),
+  };
+
+  return Object.values(contactInfo).some(Boolean) ? contactInfo : undefined;
+}
+
 export function adaptJoobleResponse(
   response: unknown,
   collectedAt: string,
@@ -132,6 +167,13 @@ export function adaptJoobleResponse(
         expiresAt: null,
         active: true,
         collectedAt,
+        contactInfo: contactInfoFromRecord(job, {
+          name: ['contactName', 'recruiterName', 'managerName'],
+          department: ['contactDepartment', 'department'],
+          email: ['email', 'contactEmail', 'recruiterEmail'],
+          phone: ['phone', 'contactPhone', 'recruiterPhone'],
+          text: ['snippet'],
+        }),
       }),
     ];
   });
@@ -165,6 +207,13 @@ export function adaptSaraminResponse(
       expiresAt: getString(job['expiration-date']) || timestampToIso(job['expiration-timestamp']),
       active: Number(job.active) === 1,
       collectedAt,
+      contactInfo: contactInfoFromRecord(job, {
+        name: ['contact-name', 'manager-name', 'recruiter-name'],
+        department: ['contact-department', 'department'],
+        email: ['contact-email', 'email'],
+        phone: ['contact-phone', 'phone'],
+        text: ['keyword'],
+      }),
     });
   });
 }
@@ -208,6 +257,12 @@ export function adaptWork24Response(
         expiresAt: work24Date(job.empWantedEndt),
         active: true,
         collectedAt,
+        contactInfo: contactInfoFromRecord(job, {
+          name: ['empChargerNm', 'chargerNm', 'contactName'],
+          department: ['empChargerDpt', 'chargerDpt', 'contactDepartment'],
+          email: ['empChargerEmail', 'chargerEmail', 'contactEmail'],
+          phone: ['empChargerTelNo', 'chargerTelNo', 'contactPhone'],
+        }),
       }),
     ];
   });
@@ -239,6 +294,11 @@ export function adaptAlioRecords(
       expiresAt: alioDate(record.pbancEndYmd),
       active: record.ongoingYn === 'Y',
       collectedAt,
+      contactInfo: contactInfoFromRecord(record as UnknownRecord, {
+        name: ['picNm', 'chargPicNm'],
+        email: ['inqryEmail', 'chargEmail'],
+        phone: ['inqryTelNo', 'chargTelNo'],
+      }),
     }),
   );
 }

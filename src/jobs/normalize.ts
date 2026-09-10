@@ -1,4 +1,10 @@
-import type { JobFamily, NormalizedJobInput, NormalizedJobPosting, Seniority } from './types.js';
+import type {
+  JobContactInfo,
+  JobFamily,
+  NormalizedJobInput,
+  NormalizedJobPosting,
+  Seniority,
+} from './types.js';
 
 const jobFamilyTerms: Array<[JobFamily, string[]]> = [
   ['sales', ['영업', '세일즈', 'sales', 'account executive', '사업개발', '파트너십']],
@@ -105,6 +111,44 @@ function normalizeDate(value: string | null, field: string) {
   return date.toISOString();
 }
 
+function compact(value: string | undefined) {
+  return value?.replace(/\s+/g, ' ').trim();
+}
+
+function normalizePhone(value: string | undefined) {
+  const phone = compact(value);
+  if (!phone) return undefined;
+  return phone.replace(/\s*[-.)]\s*/g, '-').replace(/^\((\d{2,3})\)-/, '$1-');
+}
+
+function normalizeContactInfo(contactInfo: JobContactInfo | undefined) {
+  if (!contactInfo) return undefined;
+
+  const estimatedEmails = [
+    ...new Set(
+      (contactInfo.estimatedEmails ?? [])
+        .map((email) => compact(email)?.toLowerCase())
+        .filter((email): email is string => Boolean(email)),
+    ),
+  ];
+  const normalized: JobContactInfo = {
+    ...(compact(contactInfo.name) ? { name: compact(contactInfo.name) } : {}),
+    ...(compact(contactInfo.department) ? { department: compact(contactInfo.department) } : {}),
+    ...(compact(contactInfo.email) ? { email: compact(contactInfo.email)?.toLowerCase() } : {}),
+    ...(normalizePhone(contactInfo.phone) ? { phone: normalizePhone(contactInfo.phone) } : {}),
+    ...(compact(contactInfo.contactPageUrl)
+      ? { contactPageUrl: compact(contactInfo.contactPageUrl) }
+      : {}),
+    ...(estimatedEmails.length ? { estimatedEmails } : {}),
+    ...(contactInfo.source ? { source: contactInfo.source } : {}),
+    ...(contactInfo.verificationStatus
+      ? { verificationStatus: contactInfo.verificationStatus }
+      : {}),
+  };
+
+  return Object.values(normalized).some(Boolean) ? normalized : undefined;
+}
+
 export function normalizeJobPosting(input: NormalizedJobInput): NormalizedJobPosting {
   const title = requireValue(input.title, '제목');
   const companyName = requireValue(input.companyName, '기업명');
@@ -136,5 +180,6 @@ export function normalizeJobPosting(input: NormalizedJobInput): NormalizedJobPos
     collectedAt: normalizeDate(input.collectedAt, '수집일') ?? new Date().toISOString(),
     fingerprint: createFingerprint(input),
     qualityScore: calculateQualityScore(input),
+    contactInfo: normalizeContactInfo(input.contactInfo),
   };
 }

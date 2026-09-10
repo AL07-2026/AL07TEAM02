@@ -20,6 +20,7 @@ describe('adaptJoobleResponse', () => {
             type: '정규직',
             link: 'https://kr.jooble.org/desc/6853340702360284249',
             updated: '2026-08-12T23:27:48+09:00',
+            contactEmail: 'jobs@testlab.example',
           },
         ],
       },
@@ -34,6 +35,7 @@ describe('adaptJoobleResponse', () => {
       description: 'TypeScript와 AWS 기반 서버 개발',
       location: '서울',
       active: true,
+      contactInfo: { email: 'jobs@testlab.example' },
     });
     expect(posting?.skills).toEqual(expect.arrayContaining(['TypeScript', 'AWS']));
   });
@@ -60,6 +62,7 @@ describe('adaptSaraminResponse', () => {
                 'job-type': { name: '정규직' },
               },
               keyword: 'B2B영업,Salesforce,CRM',
+              'contact-phone': '02-555-1200',
             },
           ],
         },
@@ -73,6 +76,7 @@ describe('adaptSaraminResponse', () => {
       companyName: '(주)테스트',
       jobFamily: 'sales',
       active: true,
+      contactInfo: { phone: '02-555-1200' },
     });
     expect(posting?.skills).toContain('Salesforce');
   });
@@ -93,6 +97,8 @@ describe('adaptWork24Response', () => {
             empWantedEndt: '20260930',
             empWantedTypeNm: '정규직',
             empWantedHomepgDetail: 'https://www.work24.go.kr/job/test',
+            empChargerNm: '김채용',
+            empChargerTelNo: '02-1234-5678',
           },
         },
       },
@@ -110,6 +116,7 @@ describe('adaptWork24Response', () => {
       publishedAt: '2026-08-30T15:00:00.000Z',
       expiresAt: '2026-09-29T15:00:00.000Z',
       active: true,
+      contactInfo: { name: '김채용', phone: '02-1234-5678' },
     });
     expect(posting?.jobFamily).toBe('engineering');
   });
@@ -137,6 +144,9 @@ describe('adaptAlioResponse', () => {
             hireTypeNmLst: '비정규직',
             recrutSeNm: '신입+경력',
             aplyQlfcCn: '즉시 근무 가능한 자',
+            picNm: '박담당',
+            inqryTelNo: '042-000-1000',
+            inqryEmail: 'hr@alio.example',
           },
         ],
       },
@@ -151,6 +161,7 @@ describe('adaptAlioResponse', () => {
       location: '서울',
       active: true,
       publishedAt: '2026-08-09T15:00:00.000Z',
+      contactInfo: { name: '박담당', email: 'hr@alio.example', phone: '042-000-1000' },
     });
   });
 });

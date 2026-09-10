@@ -6,10 +6,13 @@ import {
   Check,
   CircleCheck,
   LoaderCircle,
+  Mail,
+  Phone,
   ShieldCheck,
   Sparkles,
   TrendingUp,
   UserCog,
+  UserRound,
 } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 
@@ -230,6 +233,14 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   );
 }
 
+function cleanTelHref(value: string) {
+  return `tel:${value.replace(/[^\d+]/g, '')}`;
+}
+
+function contactBadgeLabel(status: 'confirmed' | 'needs_verification' | undefined) {
+  return status === 'needs_verification' ? '검증 필요' : '공개 확인';
+}
+
 function TargetCompanySummary({ targetCompany }: { targetCompany?: TargetCompany }) {
   if (!targetCompany) {
     return (
@@ -268,6 +279,7 @@ function TargetCompanySummary({ targetCompany }: { targetCompany?: TargetCompany
       ? { icon: Sparkles, label: '추천 이유', value: targetCompany.recommendationReason }
       : null,
   ].filter((detail) => detail !== null);
+  const contacts = targetCompany.contacts ?? [];
 
   return (
     <section aria-labelledby="target-company-title" className="apply-company-card">
@@ -306,6 +318,73 @@ function TargetCompanySummary({ targetCompany }: { targetCompany?: TargetCompany
           ))}
         </dl>
       ) : null}
+
+      <section className="apply-contact-panel" aria-labelledby="apply-contact-title">
+        <div className="apply-contact-heading">
+          <span>
+            <UserRound aria-hidden="true" />
+            채용담당자 접점 정보
+          </span>
+          {contacts.length ? <small>{contacts.length}건</small> : null}
+        </div>
+        <h3 id="apply-contact-title" className="sr-only">
+          채용담당자 접점 정보
+        </h3>
+        {contacts.length ? (
+          <ul className="apply-contact-list">
+            {contacts.map((contact, index) => (
+              <li key={`${contact.email ?? contact.phone ?? contact.name ?? 'contact'}-${index}`}>
+                {contact.sourceTitle ? (
+                  <p className="apply-contact-source">{contact.sourceTitle}</p>
+                ) : null}
+                {contact.name || contact.department ? (
+                  <span>
+                    <UserRound aria-hidden="true" />
+                    {[contact.department, contact.name].filter(Boolean).join(' · ')}
+                  </span>
+                ) : null}
+                {contact.verificationStatus ? (
+                  <span className="apply-contact-status" data-status={contact.verificationStatus}>
+                    {contactBadgeLabel(contact.verificationStatus)}
+                  </span>
+                ) : null}
+                {contact.email ? (
+                  <a href={`mailto:${contact.email}`}>
+                    <Mail aria-hidden="true" />
+                    {contact.email}
+                  </a>
+                ) : null}
+                {contact.phone ? (
+                  <a href={cleanTelHref(contact.phone)}>
+                    <Phone aria-hidden="true" />
+                    {contact.phone}
+                  </a>
+                ) : null}
+                {contact.contactPageUrl ? (
+                  <a href={contact.contactPageUrl} rel="noreferrer" target="_blank">
+                    채용 문의 페이지
+                  </a>
+                ) : null}
+                {contact.estimatedEmails?.map((email) => (
+                  <span className="apply-contact-estimate" key={email}>
+                    <Mail aria-hidden="true" />
+                    {email}
+                  </span>
+                ))}
+                {contact.sourceUrl ? (
+                  <a className="apply-contact-origin" href={contact.sourceUrl} rel="noreferrer" target="_blank">
+                    공고 원문 보기
+                  </a>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="apply-contact-empty">
+            이 공고 묶음에서는 공개된 담당자 연락처나 대체 접점을 확인하지 못했습니다.
+          </p>
+        )}
+      </section>
     </section>
   );
 }
@@ -328,6 +407,16 @@ function RequestSuccessState({ request, copy }: { request: ColdEmailRequest; cop
           <p className="apply-success-email">
             <strong>{request.applicantEmail}</strong>은 신청 결과 전달을 위해 사용됩니다.
           </p>
+          {request.delivery ? (
+            <p className={`apply-delivery-status ${request.delivery.status}`}>
+              {request.delivery.message ??
+                (request.delivery.status === 'sent'
+                  ? '입력한 이메일로 콜드메일 초안을 발송했습니다.'
+                  : request.delivery.status === 'failed'
+                    ? '이메일 발송에 실패했습니다.'
+                    : '이메일 발송 설정이 없어 발송을 건너뛰었습니다.')}
+            </p>
+          ) : null}
         </section>
       </main>
     </div>

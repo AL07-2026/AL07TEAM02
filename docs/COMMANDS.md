@@ -48,6 +48,10 @@
 - `JOB_ANALYSIS_QUERY`: `jobs:alio` 기본 분석 질의 덮어쓰기
 - `JOB_ANALYSIS_SECONDARY`: `jobs:alio` 보조 질의
 - `VITE_APP_NAME`, `VITE_API_BASE_URL`: `.env.example`에 있으나 현재 소스에서 사용하는 위치는 검색되지 않았다.
+- `RESEND_API_KEY`: 콜드메일 초안 발송용 Resend API 키
+- `COLD_EMAIL_FROM`: 콜드메일 초안 발송 발신자 주소
+- `COLD_EMAIL_REPLY_TO`: 콜드메일 초안 답장 주소. 선택값이다.
+- `DISABLE_CONTACT_ENRICHMENT`: `true`이면 검색 결과의 공고 원문 연락처 보강을 건너뛴다.
 
 환경변수 값은 저장소 문서나 커밋에 기록하지 않는다.
 

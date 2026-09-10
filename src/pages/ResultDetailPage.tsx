@@ -9,11 +9,13 @@ import {
   LineChart,
   Mail,
   MapPin,
+  Phone,
   Search,
   Send,
   Sparkles,
   TrendingUp,
   UserCog,
+  UserRound,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -58,6 +60,14 @@ function scoreLevel(score: number, maximum: number) {
   if (ratio >= 0.7) return 'high';
   if (ratio >= 0.4) return 'medium';
   return 'low';
+}
+
+function cleanTelHref(value: string) {
+  return `tel:${value.replace(/[^\d+]/g, '')}`;
+}
+
+function contactBadgeLabel(status: 'confirmed' | 'needs_verification' | undefined) {
+  return status === 'needs_verification' ? '검증 필요' : '공개 확인';
 }
 
 function Header() {
@@ -177,6 +187,13 @@ export function ResultDetailPage() {
                       hiringChange: analysis.hiringSituation,
                       expansionSignal: analysis.interpretation,
                       recommendationReason: analysis.recommendationReasons[0],
+                      contacts: analysis.evidence
+                        .filter((evidence) => evidence.contactInfo)
+                        .map((evidence) => ({
+                          sourceTitle: evidence.title,
+                          sourceUrl: evidence.url,
+                          ...evidence.contactInfo,
+                        })),
                     },
                   }}
                   to="/apply"
@@ -278,8 +295,8 @@ export function ResultDetailPage() {
                 <p className="section-kicker">Evidence</p>
                 <h2>판단 근거 공고</h2>
                 <div className="role-signal-list">
-                  {analysis.evidence.map((evidence) => (
-                    <article className="role-signal-card" key={evidence.url}>
+                  {analysis.evidence.map((evidence, index) => (
+                    <article className="role-signal-card" key={`${evidence.url}-${index}`}>
                       <div>
                         <strong>{evidence.title}</strong>
                         <span>{sourceLabels[evidence.source] ?? evidence.source}</span>
@@ -288,6 +305,51 @@ export function ResultDetailPage() {
                         {formatDate(evidence.publishedAt)} · {evidence.location || '지역 미기재'}
                         {evidence.headcount ? ` · ${evidence.headcount}명` : ''}
                       </p>
+                      {evidence.contactInfo ? (
+                        <div className="posting-contact-list" aria-label="채용담당자 접점 정보">
+                          {evidence.contactInfo.verificationStatus ? (
+                            <em data-status={evidence.contactInfo.verificationStatus}>
+                              {contactBadgeLabel(evidence.contactInfo.verificationStatus)}
+                            </em>
+                          ) : null}
+                          {evidence.contactInfo.name || evidence.contactInfo.department ? (
+                            <span>
+                              <UserRound aria-hidden="true" />
+                              {[evidence.contactInfo.department, evidence.contactInfo.name]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                          ) : null}
+                          {evidence.contactInfo.email ? (
+                            <a href={`mailto:${evidence.contactInfo.email}`}>
+                              <Mail aria-hidden="true" />
+                              {evidence.contactInfo.email}
+                            </a>
+                          ) : null}
+                          {evidence.contactInfo.phone ? (
+                            <a href={cleanTelHref(evidence.contactInfo.phone)}>
+                              <Phone aria-hidden="true" />
+                              {evidence.contactInfo.phone}
+                            </a>
+                          ) : null}
+                          {evidence.contactInfo.contactPageUrl ? (
+                            <a
+                              href={evidence.contactInfo.contactPageUrl}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              <ArrowRight aria-hidden="true" />
+                              채용 문의 페이지
+                            </a>
+                          ) : null}
+                          {evidence.contactInfo.estimatedEmails?.map((email) => (
+                            <span data-status="needs_verification" key={email}>
+                              <Mail aria-hidden="true" />
+                              {email}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
                       <a
                         className="back-link"
                         href={evidence.url}

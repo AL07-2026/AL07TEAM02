@@ -16,6 +16,11 @@ import {
   listHomepageFeedback,
   parseHomepageFeedbackDraft,
 } from './server/homepageFeedback.ts';
+import {
+  createTopicInterest,
+  listTopicInterests,
+  parseTopicInterestDraft,
+} from './server/topicInterests.ts';
 import { searchTryCompanies } from './server/trySearch.ts';
 
 const rootDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -159,6 +164,60 @@ function homepageFeedbackApi(): Plugin {
   };
 }
 
+function topicInterestsApi(): Plugin {
+  return {
+    name: 'topic-interests-api',
+    configureServer(server) {
+      server.middlewares.use('/api/topic-interests', (request, response, next) => {
+        if (request.method === 'POST') {
+          void readJsonBody(request)
+            .then(parseTopicInterestDraft)
+            .then(createTopicInterest)
+            .then((result) => {
+              response.writeHead(201, { 'content-type': 'application/json; charset=utf-8' });
+              response.end(JSON.stringify(result));
+            })
+            .catch((error: unknown) => {
+              response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+              response.end(
+                JSON.stringify({
+                  error: error instanceof Error ? error.message : '관심 주제를 처리하지 못했습니다.',
+                }),
+              );
+            });
+          return;
+        }
+
+        if (request.method === 'GET') {
+          const adminToken = process.env.ADMIN_ACCESS_TOKEN;
+          if (!adminToken || request.headers.authorization !== `Bearer ${adminToken}`) {
+            response.writeHead(401, { 'content-type': 'application/json; charset=utf-8' });
+            response.end(JSON.stringify({ error: '관리자 토큰이 올바르지 않습니다.' }));
+            return;
+          }
+
+          void listTopicInterests()
+            .then((selections) => {
+              response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+              response.end(JSON.stringify({ selections }));
+            })
+            .catch((error: unknown) => {
+              response.writeHead(400, { 'content-type': 'application/json; charset=utf-8' });
+              response.end(
+                JSON.stringify({
+                  error: error instanceof Error ? error.message : '관심 주제를 불러오지 못했습니다.',
+                }),
+              );
+            });
+          return;
+        }
+
+        next();
+      });
+    },
+  };
+}
+
 function readJsonBody(request: Connect.IncomingMessage) {
   return new Promise<unknown>((resolve, reject) => {
     let body = '';
@@ -200,9 +259,25 @@ export default defineConfig(({ mode }) => {
   if (!process.env.ADMIN_ACCESS_TOKEN && env.ADMIN_ACCESS_TOKEN) {
     process.env.ADMIN_ACCESS_TOKEN = env.ADMIN_ACCESS_TOKEN;
   }
+  if (!process.env.RESEND_API_KEY && env.RESEND_API_KEY) {
+    process.env.RESEND_API_KEY = env.RESEND_API_KEY;
+  }
+  if (!process.env.COLD_EMAIL_FROM && env.COLD_EMAIL_FROM) {
+    process.env.COLD_EMAIL_FROM = env.COLD_EMAIL_FROM;
+  }
+  if (!process.env.COLD_EMAIL_REPLY_TO && env.COLD_EMAIL_REPLY_TO) {
+    process.env.COLD_EMAIL_REPLY_TO = env.COLD_EMAIL_REPLY_TO;
+  }
 
   return {
-    plugins: [react(), tailwindcss(), trySearchApi(), coldEmailRequestsApi(), homepageFeedbackApi()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      trySearchApi(),
+      coldEmailRequestsApi(),
+      homepageFeedbackApi(),
+      topicInterestsApi(),
+    ],
     resolve: {
       alias: {
         '@': path.resolve(rootDirectory, 'src'),

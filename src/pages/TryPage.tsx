@@ -5,10 +5,13 @@ import {
   ChevronDown,
   ExternalLink,
   LoaderCircle,
+  Mail,
+  Phone,
   Search,
   Target,
   TrendingUp,
   UserCog,
+  UserRound,
   UserRoundSearch,
 } from 'lucide-react';
 import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
@@ -166,6 +169,14 @@ function displayAnalysisText(text: string, companyName: string) {
   return text.replaceAll(companyName, displayCompanyName(companyName));
 }
 
+function cleanTelHref(value: string) {
+  return `tel:${value.replace(/[^\d+]/g, '')}`;
+}
+
+function contactBadgeLabel(status: 'confirmed' | 'needs_verification' | undefined) {
+  return status === 'needs_verification' ? '검증 필요' : '공개 확인';
+}
+
 function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number }) {
   const roleFinding = match.roleFindings[0];
   const displayCompany = displayCompanyName(match.companyName);
@@ -260,10 +271,10 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
           </span>
         </summary>
         <ul className="mt-3 space-y-2.5">
-          {match.evidence.map((evidence) => (
+          {match.evidence.map((evidence, index) => (
             <li
               className="rounded-xl border border-[#d7e7e3] bg-[#f8fbfa] p-3.5"
-              key={evidence.url}
+              key={`${evidence.url}-${index}`}
             >
               <p className="text-sm font-bold leading-5 text-[#24332f]">
                 {displayPostingTitle(evidence.title)}
@@ -279,6 +290,66 @@ function ResultCard({ match, rank }: { match: CompanyRoleAnalysis; rank: number 
                     ? ` · 전체 ${evidence.headcount}명`
                     : ''}
               </p>
+              {evidence.contactInfo ? (
+                <div
+                  aria-label="채용담당자 접점 정보"
+                  className="mt-2 flex flex-wrap gap-2 text-xs leading-5 text-[#526b65]"
+                >
+                  {evidence.contactInfo.verificationStatus ? (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#e8f5f1] px-2 py-1 font-bold text-[#007d65] data-[status=needs_verification]:bg-[#fff9df] data-[status=needs_verification]:text-[#7a5a00]"
+                      data-status={evidence.contactInfo.verificationStatus}
+                    >
+                      {contactBadgeLabel(evidence.contactInfo.verificationStatus)}
+                    </span>
+                  ) : null}
+                  {evidence.contactInfo.name || evidence.contactInfo.department ? (
+                    <span className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 font-bold">
+                      <UserRound aria-hidden="true" className="size-3" />
+                      {[evidence.contactInfo.department, evidence.contactInfo.name]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                  ) : null}
+                  {evidence.contactInfo.email ? (
+                    <a
+                      className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 font-bold text-[#00866c] hover:underline"
+                      href={`mailto:${evidence.contactInfo.email}`}
+                    >
+                      <Mail aria-hidden="true" className="size-3" />
+                      {evidence.contactInfo.email}
+                    </a>
+                  ) : null}
+                  {evidence.contactInfo.phone ? (
+                    <a
+                      className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 font-bold text-[#00866c] hover:underline"
+                      href={cleanTelHref(evidence.contactInfo.phone)}
+                    >
+                      <Phone aria-hidden="true" className="size-3" />
+                      {evidence.contactInfo.phone}
+                    </a>
+                  ) : null}
+                  {evidence.contactInfo.contactPageUrl ? (
+                    <a
+                      className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-1 font-bold text-[#00866c] hover:underline"
+                      href={evidence.contactInfo.contactPageUrl}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      채용 문의 페이지
+                    </a>
+                  ) : null}
+                  {evidence.contactInfo.estimatedEmails?.map((email) => (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-lg bg-[#fff9df] px-2 py-1 font-bold text-[#7a5a00]"
+                      key={email}
+                    >
+                      <Mail aria-hidden="true" className="size-3" />
+                      {email}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
               <a
                 className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#00866c] hover:underline"
                 href={evidence.url}

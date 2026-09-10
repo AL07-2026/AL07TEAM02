@@ -7,6 +7,18 @@ export type TargetCompany = {
   hiringChange?: string;
   expansionSignal?: string;
   recommendationReason?: string;
+  contacts?: Array<{
+    sourceTitle?: string;
+    sourceUrl?: string;
+    name?: string;
+    department?: string;
+    email?: string;
+    phone?: string;
+    contactPageUrl?: string;
+    estimatedEmails?: string[];
+    source?: 'posting_field' | 'posting_html' | 'company_page' | 'estimated';
+    verificationStatus?: 'confirmed' | 'needs_verification';
+  }>;
 };
 
 export type ColdEmailRequestDraft = {
@@ -23,4 +35,9 @@ export type ColdEmailRequestDraft = {
 export type ColdEmailRequest = ColdEmailRequestDraft & {
   id?: string;
   submittedAt: string;
+  delivery?: {
+    status: 'sent' | 'skipped' | 'failed';
+    provider?: string;
+    message?: string;
+  };
 };
